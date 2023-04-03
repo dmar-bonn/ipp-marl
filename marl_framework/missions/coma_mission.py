@@ -1,8 +1,10 @@
 import logging
 import os
+import time
 from typing import Dict
 
 import numpy as np
+import optuna
 import seaborn as sns
 import torch
 from matplotlib import pyplot as plt
@@ -24,22 +26,20 @@ logger = logging.getLogger(__name__)
 
 class COMAMission(Mission):
     def __init__(
-        self, params: Dict, writer: SummaryWriter, max_mean_episode_return: float
+            self, params: Dict, writer: SummaryWriter, max_mean_episode_return: float
     ):
         super().__init__(params, writer, max_mean_episode_return)
 
         self.grid_map = GridMap(self.params)
         self.sensor = Sensor(SensorModel(), self.grid_map)
+        self.num_episodes = self.params["experiment"]["missions"]["n_episodes"]
+        self.batch_size = self.params["networks"]["batch_size"]
+        self.batch_number = self.params["networks"]["batch_number"]
+        self.n_agents = self.params["experiment"]["missions"]["n_agents"]
+        self.n_actions = self.params["experiment"]["constraints"]["num_actions"]
+        self.budget = params["experiment"]["constraints"]["budget"]
+        self.data_passes = self.params["networks"]["data_passes"]
         self.coma_wrapper = COMAWrapper(self.params, self.writer)
-        self.mission_type = params["mission"]["type"]
-        self.num_episodes = params["mission"]["n_episodes"]
-        self.n_agents = params["mission"]["n_agents"]
-        self.eval_frequency = params["mission"]["eval_frequency"]
-        self.budget = params["MARL_cast"]["state_space"]["budget"]
-        self.n_actions = params["MARL_cast"]["action_space"]["num_actions"]
-        self.batch_size = params["networks"]["updates"]["batch_size"]
-        self.batch_number = params["networks"]["updates"]["batch_number"]
-        self.data_passes = params["networks"]["updates"]["data_passes"]
         self.training_step_idx = 0
         self.environment_step_idx = 0
         self.episode_returns = []
@@ -56,15 +56,7 @@ class COMAMission(Mission):
         chosen_actions = []
         chosen_altitudes = []
 
-        for episode_idx in range(
-            1,
-            int(
-                self.num_episodes
-                * (self.batch_size * self.batch_number)
-                / ((self.budget + 1) * self.n_agents)
-            )
-            + 1,
-        ):
+        for episode_idx in range(1, int(self.num_episodes * (self.batch_size * self.batch_number) / ((self.budget + 1) * self.n_agents)) + 1):
 
             episode = EpisodeGenerator(
                 self.params, self.writer, self.grid_map, self.sensor
@@ -89,23 +81,17 @@ class COMAMission(Mission):
             chosen_altitudes.append(agent_altitudes)
 
             if batch_memory.size() >= self.batch_size * self.batch_number:
-                batch_memory.build_q_targets(self.coma_wrapper.target_q_network)
-                if self.mission_type == "CentralQV":
-                    batch_memory.build_v_targets(self.coma_wrapper.target_v_network)
+                batch_memory.build_td_targets(self.coma_wrapper.target_critic_network)
                 for data_pass in range(self.data_passes):
                     batches = batch_memory.build_batches()
                     q_values, q_metrics = self.coma_wrapper.q_learner.learn(
                         self.training_step_idx, batches, data_pass
                     )
-                    if self.mission_type == "CentralQV":
-                        v_values, v_metrics = self.coma_wrapper.v_learner.learn(
-                            self.training_step_idx, batches, data_pass
-                        )
-                    else:
-                        v_values = None
-                        v_metrics = None
+                    v_values, v_metrics = self.coma_wrapper.v_learner.learn(
+                        self.training_step_idx, batches, data_pass
+                    )
                     actor_network, actor_metrics = self.coma_wrapper.actor_learner.learn(
-                        batches, q_values, eps, v_values
+                        batches, q_values, eps
                     )
                     if data_pass == 0:
                         self.training_step_idx += 1
@@ -113,14 +99,8 @@ class COMAMission(Mission):
                         logger.info(f"Training step: {self.training_step_idx}")
                         logger.info(f"Environment step: {self.environment_step_idx}")
                         self.add_to_tensorboard(
-                            chosen_actions,
-                            chosen_altitudes,
-                            episode_returns,
-                            absolute_returns,
-                            episode_reward_list,
-                            q_metrics,
-                            actor_metrics,
-                            v_metrics,
+                            chosen_actions, chosen_altitudes, episode_returns, absolute_returns, episode_reward_list,
+                            q_metrics, actor_metrics
                         )
 
                 batch_memory.clear()
@@ -132,9 +112,9 @@ class COMAMission(Mission):
                 chosen_actions = []
                 chosen_altitudes = []
 
-                if self.training_step_idx % self.eval_frequency == 0:
+                if self.training_step_idx % 50 == 0:
                     self.mode = "eval"
-                    for i in range(self.eval_frequency):
+                    for i in range(50):
                         (
                             episode_return,
                             episode_rewards,
@@ -167,31 +147,21 @@ class COMAMission(Mission):
                         chosen_altitudes.append(agent_altitudes)
 
                     batch_memory.clear()
-                    self.add_to_tensorboard(
-                        chosen_actions,
-                        chosen_altitudes,
-                        episode_returns,
-                        absolute_returns,
-                        episode_reward_list,
-                    )
+                    self.add_to_tensorboard(chosen_actions, chosen_altitudes, episode_returns, absolute_returns,
+                                            episode_reward_list)
                     self.mode = "train"
                     episode_returns = []
                     episode_reward_list = []
+                    collision_returns = []
                     chosen_actions = []
                     chosen_altitudes = []
 
         return self.max_mean_episode_return
 
     def add_to_tensorboard(
-        self,
-        chosen_actions,
-        chosen_altitudes,
-        episode_returns,
-        absolute_returns,
-        episode_rewards,
-        critic_metrics=None,
-        actor_metrics=None,
-        v_metrics=None,
+            self, chosen_actions, chosen_altitudes, episode_returns, absolute_returns, episode_rewards,
+            critic_metrics=None,
+            actor_metrics=None
     ):
 
         episode_rewards = [item for sublist in episode_rewards for item in sublist]
@@ -205,14 +175,20 @@ class COMAMission(Mission):
 
         plt.figure()
         fig_ = sns.barplot(
-            x=list(range(self.n_actions)), y=action_counts, color="blue"
+            x=list(range(self.n_actions)),
+            y=action_counts,
+            color="blue",
         ).get_figure()
         self.writer.add_figure(
             f"Sampled_actions_{self.mode}", fig_, self.training_step_idx, close=True
         )
 
         plt.figure()
-        fig_ = sns.barplot(x=[5, 10, 15], y=altitude_counts, color="blue").get_figure()
+        fig_ = sns.barplot(
+            x=[5, 10, 15],
+            y=altitude_counts,
+            color="blue",
+        ).get_figure()
         self.writer.add_figure(
             f"Altitudes_{self.mode}", fig_, self.training_step_idx, close=True
         )
@@ -304,80 +280,31 @@ class COMAMission(Mission):
             self.writer.add_scalar(
                 "Critic/Explained variance", critic_metrics[7], self.training_step_idx
             )
-            # self.writer.add_scalar(
-            #     "Critic/Discounted returns mean",
-            #     np.array(critic_metrics[8]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Critic/Discounted_returns std",
-            #     np.array(critic_metrics[9]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Critic/Abs deviation Q-value <-> Return mean",
-            #     np.array(critic_metrics[10]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Critic/Abs deviation Q-value <-> Return std",
-            #     np.array(critic_metrics[11]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Critic/Log probs according to critic",
-            #     np.array(critic_metrics[12]),
-            #     self.training_step_idx,
-            # )
-            #
-            # self.writer.add_scalar("V/Loss", v_metrics[0], self.training_step_idx)
-            # self.writer.add_scalar(
-            #     "V/TD-Targets mean", v_metrics[1], self.training_step_idx
-            # )
-            # self.writer.add_scalar(
-            #     "V/TD-Targets std", v_metrics[2], self.training_step_idx
-            # )
-            # self.writer.add_scalar(
-            #     "V/Q chosen mean", v_metrics[3], self.training_step_idx
-            # )
-            # self.writer.add_scalar(
-            #     "V/Q values mean", v_metrics[4], self.training_step_idx
-            # )
-            # self.writer.add_scalar(
-            #     "V/Q values min", v_metrics[5], self.training_step_idx
-            # )
-            # self.writer.add_scalar(
-            #     "V/Q values std", v_metrics[6], self.training_step_idx
-            # )
-            # self.writer.add_scalar(
-            #     "V/Explained variance", v_metrics[7], self.training_step_idx
-            # )
-            # self.writer.add_scalar(
-            #     "V/Discounted returns mean",
-            #     np.array(v_metrics[8]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "V/Discounted_returns std",
-            #     np.array(v_metrics[9]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "V/Abs deviation Q-value <-> Return mean",
-            #     np.array(v_metrics[10]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "V/Abs deviation Q-value <-> Return std",
-            #     np.array(v_metrics[11]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "V/Log probs according to critic",
-            #     np.array(v_metrics[12]),
-            #     self.training_step_idx,
-            # )
-
+            self.writer.add_scalar(
+                "Critic/Discounted returns mean",
+                np.array(critic_metrics[8]),
+                self.training_step_idx,
+            )
+            self.writer.add_scalar(
+                "Critic/Discounted_returns std",
+                np.array(critic_metrics[9]),
+                self.training_step_idx,
+            )
+            self.writer.add_scalar(
+                "Critic/Abs deviation Q-value <-> Return mean",
+                np.array(critic_metrics[10]),
+                self.training_step_idx,
+            )
+            self.writer.add_scalar(
+                "Critic/Abs deviation Q-value <-> Return std",
+                np.array(critic_metrics[11]),
+                self.training_step_idx,
+            )
+            self.writer.add_scalar(
+                "Critic/Log probs according to critic",
+                np.array(critic_metrics[12]),
+                self.training_step_idx,
+            )
             self.writer.add_scalar(
                 "Actor/Loss", actor_metrics[0], self.training_step_idx
             )
@@ -400,28 +327,20 @@ class COMAMission(Mission):
                 np.array(actor_metrics[5]),
                 self.training_step_idx,
             )
-            # self.writer.add_scalar(
-            #     "Actor/Hidden state entropy",
-            #     np.array(actor_metrics[6]),
-            #     self.training_step_idx,
-            # )
+            self.writer.add_scalar(
+                "Actor/Hidden state entropy",
+                np.array(actor_metrics[6]),
+                self.training_step_idx,
+            )
 
             if self.training_step_idx % 100 == 0:
-                for tag, params in self.coma_wrapper.q_network.named_parameters():
+                for tag, params in self.coma_wrapper.critic_network.named_parameters():
                     if params.grad is not None:
                         self.writer.add_histogram(
                             f"Critic/Parameters/{tag}",
                             params.data.cpu().numpy(),
                             self.training_step_idx,
                         )
-                # if self.training_step_idx % 100 == 0:
-                #     for tag, params in self.coma_wrapper.v_network.named_parameters():
-                #         if params.grad is not None:
-                #             self.writer.add_histogram(
-                #                 f"V/Parameters/{tag}",
-                #                 params.data.cpu().numpy(),
-                #                 self.training_step_idx,
-                #             )
                 for tag, params in self.coma_wrapper.actor_network.named_parameters():
                     if params.grad is not None:
                         self.writer.add_histogram(
@@ -491,46 +410,22 @@ class COMAMission(Mission):
                 self.training_step_idx,
             )
 
-            # self.writer.add_scalar(
-            #     "Parameters/V/Conv1 gradients",
-            #     np.array(v_metrics[-1][0]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Parameters/V/Conv2 gradients",
-            #     np.array(v_metrics[-1][1]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Parameters/V/Conv3 gradients",
-            #     np.array(v_metrics[-1][2]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Parameters/V/FC1 gradients",
-            #     np.array(v_metrics[-1][3]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Parameters/V/FC2 gradients",
-            #     np.array(v_metrics[-1][4]),
-            #     self.training_step_idx,
-            # )
-            # self.writer.add_scalar(
-            #     "Parameters/V/FC3 gradients",
-            #     np.array(v_metrics[-1][5]),
-            #     self.training_step_idx,
-            # )
-
     def save_best_model(self, actor_network):
         running_mean_return = sum(self.episode_returns) / len(self.episode_returns)
         patience = self.params["experiment"]["missions"]["patience"]
         best_model_file_path = os.path.join(constants.LOG_DIR, "best_model.pth")
 
         if (
-            len(self.episode_returns) >= patience
-            and running_mean_return > self.max_mean_episode_return
+                len(self.episode_returns) >= patience
+                and running_mean_return > self.max_mean_episode_return
         ):
             self.max_mean_episode_return = running_mean_return
             torch.save(actor_network, best_model_file_path)
-
+        if self.training_step_idx == 300:
+            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_300.pth"))
+        if self.training_step_idx == 400:
+            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_400.pth"))
+        if self.training_step_idx == 500:
+            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_500.pth"))
+        if self.training_step_idx == 600:
+            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_600.pth"))

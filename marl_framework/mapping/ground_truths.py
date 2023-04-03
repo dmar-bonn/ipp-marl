@@ -154,6 +154,10 @@ def gaussian_random_field(pk, x_dim: int, y_dim: int, episode: int) -> np.array:
             field[int((y_dim * (1 - percentage_idx)) / 100):, int((x_dim * (1 - percentage_idx)) / 100):] = 0
             field[:int((y_dim * percentage_idx) / 100), int((x_dim * (1 - percentage_idx)) / 100):] = 0
 
+    # plt.imshow(field)
+    # plt.title(f"type_{environment_type_idx}")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/{episode}_groundtruth.png")
 
 
     # if environment_type_idx == 0:
@@ -163,5 +167,8 @@ def gaussian_random_field(pk, x_dim: int, y_dim: int, episode: int) -> np.array:
 
     temperature_map = create_ground_truth_map(TEMPERATURE_FIELD_PATH)
 
+    # plt.imshow(temperature_map, cmap="plasma", vmin=0, vmax=1)
+    # plt.colorbar()
+    # plt.show()
 
-    return field
+    return field     # temperature_map

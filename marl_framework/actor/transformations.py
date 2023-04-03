@@ -4,8 +4,11 @@ from typing import Dict, List
 import numpy as np
 import cv2
 import torch
+from matplotlib import pyplot as plt
+
 from agent.state_space import AgentStateSpace
 from utils.state import get_w_entropy_map
+from utils.utils import normalize
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +19,10 @@ def get_network_input(
     total_budget = params["experiment"]["constraints"]["budget"]
     spacing = params["experiment"]["constraints"]["spacing"]
 
+    # plt.imshow(local_map)
+    # plt.title(f"local_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_local_map.png")
 
     position_map, position = get_position_feature_map(
         local_information, agent_id, agent_state_space, params
@@ -36,6 +43,47 @@ def get_network_input(
     # running: observation_map = torch.tensor(np.dstack([budget_map, agent_id_map, position_map, w_entropy_map, local_w_entropy_map, prob_map, footprint_map]))
 
     observation_map = torch.tensor(np.dstack([budget_map, agent_id_map, position_map, w_entropy_map, local_w_entropy_map, prob_map, footprint_map]))
+
+    # plt.imshow(budget_map)
+    # plt.title(f"budget_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_budget_map.png")
+    #
+    # plt.imshow(agent_id_map)
+    # plt.title(f"agent_id_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_agent_id_map.png")
+    #
+    # plt.imshow(altitude_map)
+    # plt.title(f"altitude_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_altitude_map.png")
+    #
+    # plt.imshow(position_map)
+    # plt.title(f"position_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_position_map.png")
+    #
+    # plt.imshow(prob_map)
+    # plt.title(f"prob_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_prob_map.png")
+    #
+    # plt.imshow(w_entropy_map)
+    # plt.title(f"w_entropy_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_w_entropy_map.png")
+    #
+    # plt.imshow(local_w_entropy_map)
+    # plt.title(f"local_w_entropy_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_local_w_entropy_map.png")
+    #
+    # plt.imshow(footprint_map)
+    # plt.title(f"footprint_map")
+    # plt.clim(0, 1)
+    # plt.savefig(f"/home/penguin2/Documents/plots/t_{t}_agent_{agent_id}_footprint_map.png")
+
     return observation_map   # torch.unsqueeze(observation_map, -1)
 
 

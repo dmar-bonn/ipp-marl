@@ -22,14 +22,15 @@ def load_from_env(env_var_name: str, data_type: callable, default=None):
         )
     return default
 
-REPO_DIR = "/home/penguin2/jonas-project/marl_framework/"
-
 
 PLOT_LABEL_FONT_SIZE = 30
 PLOT_LEGEND_FONT_SIZE = 20
 PLOT_TICKS_SIZE = 20
 PLOT_LINE_WIDTH = 5
 
+REPO_DIR = "/home/penguin2/jonas-project/marl_framework/"
+# REPO_DIR = "/home/julius/Dokumente/Uni/Bonn/multi_agent_rl/marl_framework/"
+# REPO_DIR = "/home/masha/jonas/multi_agent_rl/marl_framework/"
 
 CONFIG_FILE_PATH = load_from_env("CONFIG_FILE_PATH", str, "params.yaml")
 CONFIG_FILE_PATH = os.path.join(REPO_DIR, CONFIG_FILE_PATH)
@@ -94,6 +95,11 @@ class MissionParams:
     STATIC_MISSION = ["min_altitude", "max_altitude", "budget"]
     COMA = ["spacing", "n_agents"]
 
+
+MISSION_TYPES = ["COMA", "reduced", "random", "lawnmower", "DeepQ"]
+
+UAV_PARAMS = ["max_v", "max_a", "sampling_time"]
+ENV_PARAMS = ["x_dim", "y_dim"]
 
 
 class EvaluationMeasure:

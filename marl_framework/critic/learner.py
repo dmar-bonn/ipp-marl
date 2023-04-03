@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 torch.autograd.set_detect_anomaly(True)
 
 
-class VLearner:
+class CriticLearner:
     def __init__(self, params: Dict, writer, critic):
         self.params = params
         self.critic = critic
@@ -73,32 +73,29 @@ class VLearner:
             batch_td_targets = []
             batch_discounted_returns = []
             for batch_idx in batch:
-                batch_states.append(batch_idx.v_state)
+                batch_states.append(batch_idx.state)
                 batch_actions.append(batch_idx.action)
-                batch_td_targets.append(batch_idx.v_target)
+                batch_td_targets.append(batch_idx.td_target)
                 batch_discounted_returns.append(batch_idx.discounted_return)
-            batch_q_value, _ = self.critic.forward(
+            batch_q_values, _ = self.critic.forward(
                 torch.stack(batch_states).squeeze().to(self.device)
             )
-            # batch_q_chosen = torch.gather(
-            #     batch_q_values, dim=1, index=torch.stack(batch_actions)
-            # )
+            batch_q_chosen = torch.gather(
+                batch_q_values, dim=1, index=torch.stack(batch_actions)
+            )
             td_error = (
                 torch.square(
-                    batch_q_value
+                    batch_q_chosen
                     - torch.stack(batch_td_targets).to(self.device).detach()
                 )
                 .squeeze()
                 .mean()
             )
-
-            # print(f"batch_q_value: {batch_q_value}")
-            # print(f"batch_td_targets: {batch_td_targets}")
-            # print(f"td_error: {td_error}")
-
             td_errors.append(td_error)
+
             td_targets.append(torch.stack(batch_td_targets))
             discounted_returns.append(torch.stack(batch_discounted_returns))
+            chosen_q_values.append(batch_q_chosen)
 
             self.optimizer.zero_grad()
             td_error.backward()
@@ -110,10 +107,10 @@ class VLearner:
                     torch.stack(batch_states).squeeze().to(self.device)
                 )
             all_q_values.append(batch_new_q_values)
-            # batch_log_prob_chosen = torch.gather(
-            #     batch_log_probs.squeeze(), dim=1, index=torch.stack(batch_actions)
-            # )
-            critic_log_prob_chosen.append(torch.tensor([0]))
+            batch_log_prob_chosen = torch.gather(
+                batch_log_probs.squeeze(), dim=1, index=torch.stack(batch_actions)
+            )
+            critic_log_prob_chosen.append(batch_log_prob_chosen)
 
         conv1_grad_norm = 0
         conv2_grad_norm = 0
@@ -158,7 +155,7 @@ class VLearner:
                 torch.mean(torch.stack(td_errors)),
                 torch.mean(torch.stack(td_targets)),
                 torch.std(torch.stack(td_targets)),
-                torch.mean(torch.stack(all_q_values)),
+                torch.mean(torch.stack(chosen_q_values)),
                 torch.mean(torch.stack(all_q_values)),
                 torch.min(torch.stack(all_q_values)),
                 torch.std(torch.stack(all_q_values)),
@@ -171,6 +168,7 @@ class VLearner:
                 torch.mean(
                     torch.abs(
                         torch.stack(discounted_returns)
+                        - torch.stack(chosen_q_values).cpu()
                     )
                 )
                 .detach()
@@ -178,11 +176,12 @@ class VLearner:
                 torch.std(
                     torch.abs(
                         torch.stack(discounted_returns)
+                        - torch.stack(chosen_q_values).cpu()
                     )
                 )
                 .detach()
                 .numpy(),
-                torch.mean(torch.stack(discounted_returns)),
+                torch.mean(torch.stack(critic_log_prob_chosen)).cpu(),
                 [conv1_grad_norm/conv1_count, conv2_grad_norm/conv2_count, conv3_grad_norm/conv3_count, fc1_grad_norm/fc1_count, 0, fc3_grad_norm/fc3_count]
             ],
         )

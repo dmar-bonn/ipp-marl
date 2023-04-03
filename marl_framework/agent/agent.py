@@ -1,6 +1,9 @@
 import logging
 from typing import Dict
 
+import numpy as np
+from matplotlib import pyplot as plt
+
 from actor.network import ActorNetwork
 from agent.action_space import AgentActionSpace
 from agent.communication_log import CommunicationLog
@@ -20,16 +23,16 @@ class Agent:
     ):
         self.params = params
         self.agent_id = agent_id
-        self.action_space = AgentActionSpace(self.params)
-        self.mission_type = params["mission"]["type"]
-        self.n_actions = params["MARL_cast"]["action_space"]["num_actions"]
-        self.v_max = params["experiment"]["uav"]["max_v"]
-        self.a_max = params["experiment"]["uav"]["max_a"]
+        self.mission_type = self.params["experiment"]["missions"]["type"]
+        self.n_actions = self.params["experiment"]["constraints"]["num_actions"]
+        self.v_max = self.params["experiment"]["uav"]["max_v"]
+        self.a_max = self.params["experiment"]["uav"]["max_a"]
         self.x_dim = params["environment"]["x_dim"]
         self.y_dim = params["environment"]["y_dim"]
         self.mapping = mapping
         self.local_map = mapping.init_priors()
         self.agent_state_space = agent_state_space
+        self.action_space = AgentActionSpace(self.params)
         self.actor_network = actor_network
         self.agent_info = dict()
         self.position = None
@@ -71,16 +74,13 @@ class Agent:
 
         # ACTION CHOICE (here: based on RL)
         probs, action, mask, eps = self.actor_network.get_action_index(
-            batch_memory, action_mask_1d, self.agent_id, num_episode, mode
+            batch_memory, action_mask_1d, self.agent_id, t, num_episode, mode
         )
         # Append chosen action to previous position to get new position
         self.position = self.action_space.action_to_position(self.position, action)
 
         if not self.is_in_map(self.position):
-            logger.error(
-                f"Agent out of environment!"
-            )
-            raise ValueError
+            print("OUT OF MAP")
 
         # Sense and update grid map
         self.local_map, self.map_footprint, footprint_idx, self.map2communicate, self.footprint_img = self.mapping.update_grid_map(self.position, self.local_map, t, mode)

@@ -8,15 +8,13 @@ from matplotlib import pyplot as plt
 TransitionCOMA = namedtuple(
     "TransitionPPO",
     (
-        "q_state",
-        "v_state",
+        "state",
         "observation",
         "action",
         "mask",
         "reward",
         "done",
-        "q_target",
-        "v_target",
+        "td_target",
         "discounted_return",
     ),
 )

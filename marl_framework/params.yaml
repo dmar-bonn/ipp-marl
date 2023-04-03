@@ -1,4 +1,5 @@
 environment:
+  num_envs: 2
   seed: 3  # not 0, would mean same start position for every uav
   x_dim: 50 # [m]
   y_dim: 50 # [m]
@@ -9,86 +10,95 @@ sensor:
     angle_x: 60 # [°]
     angle_y: 60 # [°]
   pixel:
-    number_x: 57 # --> 10cm resolution
+    number_x: 57   # 57 --> 10cm resolution
     number_y: 57
   encoding: "rgb8"
   model:
     type: "altitude_dependent"
-    coeff_a: 0.05
-    coeff_b: 0.2
+    coeff_a: 0.05   # 0.2
+    coeff_b: 0.2   # 0.5
+  simulation:
+    type: "random_field"
+    cluster_radius: 5
 
 mapping:
   prior: 0.5
-  simulation:
-    type: "random_field"
-    cluster_radius: 5 # [m]
 
-MARL_cast:
-  state_space:
+experiment:
+  title: "test_experiment"
+  constraints:
     spacing: 5 # [m]
-    min_altitude: 5 # [m]
-    max_altitude: 15 # [m]
-    budget: 14 # [s]
-    random_start: True
-  action_space:
+    min_altitude: 5
+    max_altitude: 15
+    budget: 14
     num_actions: 6
-  reward:
-    reward_normalization: false
-  communication:
+  uav:
+    max_v: 5 # [m/s]
+    max_a: 2 # [m/s]
+    sampling_time: 2 # [s]
     communication_range: 25  # [m]
     fix_range: True
     failure_rate: 0
+  missions:
+    type: "COMA"              # COMA, random or lawnmower, or DeepQ
+    mission_mode: "training"     # training or deployment
+    n_episodes: 1500
+    patience: 100
+    n_agents: 4
+    action_space: "larger"      # smaller, larger, reduced, 2d_reduced or one_altitude
+    planning_uncertainty: "SE"         # SE, RMSE or MAE
+    eps_max: 0.5
+    eps_min: 0.02
+    eps_anneal_phase: 10000  # 15000
+    use_eps: True
+    class_weighting: [0, 1]
+    reward_normalization: false
+  baselines:
+    lawnmower:
+      trials: 50
+      altitude: 5
+    random:
+      n_episodes: 50
+    information_gain:
+      trials: 50
+      communication: true
 
-mission:
-  type: "COMA"              # COMA, DeepQ, or CentralQV
-  mission_mode: "training"     # training or deployment
-  n_episodes: 1500   # full batch fillings
-  patience: 100
-  n_agents: 4
-  eval_frequency: 50
-
-exploration:
-  use_eps: True
-  eps_max: 0.5
-  eps_min: 0.02
-  eps_anneal_phase: 10000
-
-adaptive_planning:
-  class_weighting: [0, 1]
-  planning_uncertainty: "SE"         # SE, RMSE or MAE
-
-baselines:
-  lawn_mower:
-    trials: 50
-    altitude: 5
-  random:
-    n_episodes: 50
-  information_gain:
-    trials: 1
-    communication: true
+evaluation:
+  repetitions: 1
+  metrics:
+    - "num_waypoints"
+    - "paths"
+    - "rmse"
+    - "wrmse"
+    - "mll"
+    - "wmll"
+    - "run_time"
 
 networks:
+  type: "CNN"
+  data_passes: 5
+  batch_size: 600
+  batch_number: 5
+  copy_rate: 10     # full episodes
+  gamma: 0.99
+  lambda: 0.8
   actor:
     hidden_dim: 128
-    learning_rate: 0.00001
+    learning_rate: 0.00001 # 0.000005
     momentum: 0.9
     gradient_norm: 10
   critic:
     target_update_mode: "hard"
     tau: 0.01
+    update_mode: "random_batches"
     synchronization: "no"
     fc1_dim: 64
-    learning_rate: 0.0001
+    learning_rate: 0.0001 # 0.00003
     momentum: 0.9
     gradient_norm: 10
-  updates:
-    data_passes: 5
-    batch_size: 600
-    batch_number: 5
-    copy_rate: 10     # full episodes
-    shuffle_batches: true
 
-rl_hyperparams:
-  gamma: 0.99
-  lambda: 0.8
-
+classification:
+  n_episodes: 300
+  data_split: [0.4, 0.4, 0.2]
+  number_epochs: 100
+  batch_size: 50

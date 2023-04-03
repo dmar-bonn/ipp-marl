@@ -24,13 +24,14 @@ class EpisodeGenerator:
         self.writer = writer
         self.grid_map = grid_map
         self.sensor = sensor
-        self.mission_mode = params["mission"]["mission_mode"]
-        self.n_agents = params["mission"]["n_agents"]
-        self.prior = params["mapping"]["prior"]
-        self.budget = params["MARL_cast"]["state_space"]["budget"]
-        self.batch_size = params["networks"]["updates"]["batch_size"]
-        self.class_weighting = params["adaptive_planning"]["class_weighting"]
+        self.mission_mode = params["experiment"]["missions"]["mission_mode"]
+        self.budget = params["experiment"]["constraints"]["budget"]
+        self.n_agents = self.params["experiment"]["missions"]["n_agents"]
+        self.batch_size = self.params["networks"]["batch_size"]
+        self.prior = self.params["mapping"]["prior"]
+        self.class_weighting = params["experiment"]["missions"]["class_weighting"]
         self.mission_time: int = 0
+        self.state = None
         self.data_episodes = []
         self.episode_returns = []
         self.collision_returns = []
@@ -75,6 +76,8 @@ class EpisodeGenerator:
             agent_positions.append(new_positions)
             agent_altitudes.append(altitudes)
 
+            # if done:
+            #     break
 
         return (
             episode_return,

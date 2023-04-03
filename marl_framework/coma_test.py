@@ -48,7 +48,7 @@ class COMATest:
     def execute(self, test_mode, num_episode):
         agents = []
         net = torch.load(
-            "/home/penguin2/jonas-project/marl_framework/logs/coma/best_model.pth",
+            "/home/penguin2/jonas-project/marl_framework/logs/iac_800/best_model.pth",
             map_location=self.device,
         )
         net.eval()
@@ -72,7 +72,6 @@ class COMATest:
         entropies = []
         rmses = []
         agent_altitudes = []
-        map_states = []
         start_positions = None
 
         # plt.imshow(self.mapping.simulated_map)
@@ -90,7 +89,6 @@ class COMATest:
         rmse = get_wrmse(self.map, self.mapping.simulated_map)
         entropies.append(entropy)
         rmses.append(rmse)
-        map_states.append(self.map)
 
         for t in range(self.budget + 1):
             global_information, positions, observations = self.coma_wrapper.build_observations(
@@ -152,12 +150,11 @@ class COMATest:
             rmses.append(rmse)
             rewards.append(reward)
             relative_rewards.append(relative_reward)
-            map_states.append(next_global_map)
 
-        return sum(rewards), agent_positions, agent_altitudes, entropies, rmses, sum(relative_rewards), map_states
+        return sum(rewards), agent_positions, agent_altitudes, entropies, rmses, sum(relative_rewards)
 
-    def plot_mission(self, agent_positions, writer, entropies, trial, map_states):
-        plot_trajectories(agent_positions, self.n_agents, writer, trial, 0, self.budget, self.mapping.simulated_map, map_states)
+    def plot_mission(self, agent_positions, writer, entropies, trial):
+        plot_trajectories(agent_positions, self.n_agents, writer, trial, 0, self.budget, self.mapping.simulated_map)
     #     plot_performance(self.budget, entropies)
 
 
@@ -174,7 +171,7 @@ def save_mission_numbers(entropy_list, rmse_list, trials, budget):
     print(f"entropy_metrics: {entropy_metrics}")
     print(f"rmse_metrics: {rmse_metrics}")
 
-    with open('/home/penguin2/Documents/PAPER_PLOTS/test.json', 'w') as fp:
+    with open('/home/penguin2/Documents/PAPER_PLOTS/iac_f1.json', 'w') as fp:
         json.dump([entropy_metrics, rmse_metrics], fp)
         ### json.dump(entropy_metrics, fp)
 
@@ -210,14 +207,14 @@ def main():
         for trial in range(1, trials + 1):
             print(f"Trial: {trial}")
             coma_test = COMATest(params, writer, trial)
-            global_return, agent_positions, agent_altitudes, entropies, rmses, relative_return, map_states = coma_test.execute(
+            global_return, agent_positions, agent_altitudes, entropies, rmses, relative_return = coma_test.execute(
                 test_mode, trial)
             altitude_list.append([item for sublist in agent_altitudes for item in sublist])
             entropies_list.append(entropies)
             rmse_list.append(rmses)
             returns.append(global_return)
             relative_returns.append(relative_return)
-            coma_test.plot_mission(agent_positions, writer, None, trial, map_states)
+            coma_test.plot_mission(agent_positions, writer, None, trial)
             print(f"Return: {global_return}")
             print(f"Relative return: {relative_return}")
 

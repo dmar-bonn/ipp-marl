@@ -53,6 +53,12 @@ class Simulation:
 
     @staticmethod
     def get_noisy_map_section(sensor_noise, map_section, mode):
+        # if mode == "train":
+        # accuracy = 1 - sensor_noise
+        # grid_value = accuracy * map_section
+        # np.putmask(grid_value, (1 - accuracy) > grid_value, 1 - accuracy)
+        # else:
+
         accuracy = 1 - sensor_noise
         correctness = torch.multinomial(torch.tensor([sensor_noise, accuracy]), map_section.size, replacement=True)
         correctness = torch.reshape(correctness, np.shape(map_section)).numpy()

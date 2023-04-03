@@ -9,13 +9,13 @@ logger = logging.getLogger(__name__)
 class AgentActionSpace:
     def __init__(self, params: Dict):
         self.params = params
-        self.spacing = params["MARL_cast"]["state_space"]["spacing"]
-        self.min_altitude = params["MARL_cast"]["state_space"]["min_altitude"]
-        self.max_altitude = params["MARL_cast"]["state_space"]["max_altitude"]
-        self.num_actions = params["MARL_cast"]["action_space"]["num_actions"]
+        self.spacing = params["experiment"]["constraints"]["spacing"]
+        self.min_altitude = params["experiment"]["constraints"]["min_altitude"]
+        self.max_altitude = params["experiment"]["constraints"]["max_altitude"]
         self.space_x_dim = 3
         self.space_y_dim = 3
         self.space_z_dim = (self.max_altitude - self.min_altitude) // self.spacing + 1
+        self.num_actions = params["experiment"]["constraints"]["num_actions"]
         self.environment_x_dim = params["environment"]["x_dim"]
         self.environment_y_dim = params["environment"]["y_dim"]
         self.space_dim = np.array(

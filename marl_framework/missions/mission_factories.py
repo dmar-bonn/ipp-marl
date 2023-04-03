@@ -37,8 +37,9 @@ class MissionFactory:
 
         if (
             self.mission_type == MissionType.COMA
+            or self.mission_type == MissionType.random
+            or self.mission_type == MissionType.reduced
             or self.mission_type == MissionType.DeepQ
-            or self.mission_type == MissionType.CentralQV
         ):
             return COMAMission(self.params, self.writer, -np.inf)
         else:

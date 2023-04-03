@@ -49,6 +49,11 @@ def get_network_input(
                                               np.expand_dims(position_map, 2), w_entropy_map, prob_map,
                                               np.expand_dims(footprint_map, 2) , np.expand_dims(other_actions_map, 2)))).float()
 
+    # total_input_map = torch.tensor(np.dstack((actor_network_input.cpu().detach().numpy(),
+    #                                           np.expand_dims(position_map, 2), w_entropy_map, prob_map,
+    #                                           np.expand_dims(footprint_map, 2)))).float()
+
+
 
     # IAC input
     # total_input_map = actor_network_input.float()
@@ -130,7 +135,7 @@ def get_network_input(
     # plt.clim(0, 1)
     # plt.savefig(f"/home/penguin2/Documents/plots/critic_input_11_t{t}_agent{agent_id}.png")
 
-    batch_memory.insert(-1, agent_id, q_state=total_input_map)
+    batch_memory.insert(-1, agent_id, state=total_input_map)
     return total_input_map
 
 
@@ -194,3 +199,16 @@ def get_other_actions_map(batch_memory, global_information, agent_id, params: Di
     return action_map
 
 
+def get_previous_actions_map(t, batch_memory, params: Dict):
+    n_actions = params["experiment"]["constraints"]["num_actions"]
+    n_agents = params["experiment"]["missions"]["n_agents"]
+
+    if t == 0:
+        prev_actions_map = np.expand_dims(np.zeros(n_agents), axis=1)
+    else:
+        prev_actions_map = np.zeros(n_agents)
+        for agent_id in range(n_agents):
+            action = batch_memory.get(-2, agent_id, "action") / (n_actions - 1)
+            prev_actions_map[agent_id] = action.cpu()
+        prev_actions_map = np.expand_dims(prev_actions_map, axis=1)
+    return prev_actions_map

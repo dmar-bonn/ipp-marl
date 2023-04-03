@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 class CommunicationLog:
     def __init__(self, params: Dict, num_episode: int):
         self.params = params
-        self.communication_range = self.params["MARL_cast"]["state_space"][
+        self.communication_range = self.params["experiment"]["uav"][
             "communication_range"
         ]
-        self.fix_range = self.params["MARL_cast"]["state_space"][
+        self.fix_range = self.params["experiment"]["uav"][
             "fix_range"
         ]
-        self.failure_rate = self.params["MARL_cast"]["state_space"][
+        self.failure_rate = self.params["experiment"]["uav"][
             "failure_rate"
         ]
-        self.n_agents = self.params["mission"]["n_agents"]
+        self.n_agents = self.params["experiment"]["missions"]["n_agents"]
         self.global_log = dict()
 
         if not self.fix_range:

@@ -5,35 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="835c6ac6-3fcc-4937-bc44-90948c851323" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/v_function/network.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/v_function/transformations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/actor/learner.py" beforeDir="false" afterPath="$PROJECT_DIR$/actor/learner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/actor/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/actor/network.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/actor/transformations.py" beforeDir="false" afterPath="$PROJECT_DIR$/actor/transformations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent/action_space.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent/action_space.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent/agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent/agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent/communication_log.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent/communication_log.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent/state_space.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent/state_space.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/batch_memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/batch_memory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coma_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/coma_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coma_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/coma_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/critic/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/critic/learner.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/critic/network.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/critic/transformations.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapping/grid_maps.py" beforeDir="false" afterPath="$PROJECT_DIR$/mapping/grid_maps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapping/ground_truths.py" beforeDir="false" afterPath="$PROJECT_DIR$/mapping/ground_truths.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapping/mappings.py" beforeDir="false" afterPath="$PROJECT_DIR$/mapping/mappings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapping/simulations.py" beforeDir="false" afterPath="$PROJECT_DIR$/mapping/simulations.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/missions/coma_mission.py" beforeDir="false" afterPath="$PROJECT_DIR$/missions/coma_mission.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/missions/episode_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/missions/episode_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/missions/mission_factories.py" beforeDir="false" afterPath="$PROJECT_DIR$/missions/mission_factories.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/missions/missions.py" beforeDir="false" afterPath="$PROJECT_DIR$/missions/missions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/params.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/params.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plotting.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plotting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

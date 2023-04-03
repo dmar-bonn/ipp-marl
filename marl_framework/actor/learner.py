@@ -19,22 +19,22 @@ class ActorLearner:
         self.actor = actor
         self.agent_state_space = agent_state_space
         self.params = params
+        self.n_actions = params["experiment"]["constraints"]["num_actions"]
         self.writer = writer
-        self.n_agents = self.params["mission"]["n_agents"]
-        self.n_actions = params["MARL_cast"]["action_space"]["num_actions"]
-        self.budget = params["MARL_cast"]["state_space"]["budget"]
-        self.batch_size = params["networks"]["updates"]["batch_size"]
+        self.device = torch.device("cpu")
+        self.actor.to(self.device)
+        self.batch_size = params["networks"]["batch_size"]
+        self.n_agents = self.params["experiment"]["missions"]["n_agents"]
+        self.budget = params["experiment"]["constraints"]["budget"]
         self.lr = params["networks"]["actor"]["learning_rate"]
         self.momentum = params["networks"]["actor"]["momentum"]
         self.gradient_norm = params["networks"]["actor"]["gradient_norm"]
         self.optimizer = torch.optim.Adam(self.actor.parameters(),
-                                          lr=self.lr)
+                                          lr=self.lr)  # optim.RMSprop(self.actor.parameters(), self.lr, self.momentum)
         self.optimizer.zero_grad()
         self.kl_loss = nn.KLDivLoss()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.actor.to(self.device)
 
-    def learn(self, batches, q_values, eps, v_values):
+    def learn(self, batches, q_values, eps):
         advantages = []
         log_probs_chosen = []
         log_probs_all = []
@@ -45,19 +45,17 @@ class ActorLearner:
             batch_actions = []
             batch_masks = []
             batch_q_values = q_values[i]
-            batch_v_values = v_values[i]                #
-
             for batch_idx in batch:
                 batch_observations.append(batch_idx.observation.float())
                 batch_actions.append(batch_idx.action)
                 batch_masks.append(batch_idx.mask)
 
-            batch_probs, batch_hidden_states = self.actor.forward(
+            batch_probs, batch_hidden_states = self.actor.forward(               #
                 torch.stack(batch_observations).squeeze().to(self.device), eps
             )
             batch_log_probs = torch.log(batch_probs)
             with torch.no_grad():
-                batch_probs = batch_probs * torch.stack(batch_masks)
+                batch_probs = batch_probs * torch.stack(batch_masks)               #
                 batch_sum = batch_probs.sum(-1).unsqueeze(1).repeat(1, self.n_actions)
                 batch_sum[batch_sum < 0.00001] = 0.00001
                 batch_probs_norm = batch_probs/batch_sum
@@ -76,11 +74,10 @@ class ActorLearner:
             batch_q_chosen = torch.gather(
                 batch_q_values, dim=1, index=torch.stack(batch_actions)
             )
-            # baseline = (torch.exp(batch_log_probs_norm) * batch_q_values * torch.stack(batch_masks))
-            baseline = batch_v_values        ###
+            baseline = (torch.exp(batch_log_probs_norm) * batch_q_values * torch.stack(batch_masks))
             baseline_sum = baseline.sum(-1)
 
-            batch_advantages = batch_q_chosen - baseline_sum.unsqueeze(1)
+            batch_advantages = batch_q_chosen - baseline_sum.unsqueeze(1)        ##############S
             batch_log_probs_chosen = torch.gather(
                 batch_log_probs, dim=1, index=torch.stack(batch_actions)
             )
@@ -88,7 +85,7 @@ class ActorLearner:
             log_probs_chosen.append(batch_log_probs_chosen)
             log_probs_all.append(batch_log_probs)
 
-            loss = -(batch_advantages.detach() * batch_log_probs_chosen).mean()   #  * torch.stack(batch_masks)).mean()
+            loss = -(batch_advantages.detach() * batch_log_probs_chosen * torch.stack(batch_masks)).mean()
             losses.append(loss)
 
             self.optimizer.zero_grad()

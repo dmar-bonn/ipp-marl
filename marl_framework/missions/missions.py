@@ -1,10 +1,15 @@
 from typing import Dict
+
+import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
 
 class Mission:
     def __init__(
-            self, params: Dict, writer: SummaryWriter, max_mean_episode_return: float = -100
+        self,
+        params: Dict,
+        writer: SummaryWriter,
+        max_mean_episode_return: float = -100,
     ):
         super(Mission, self).__init__()
 
