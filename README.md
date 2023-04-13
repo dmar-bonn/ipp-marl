@@ -3,7 +3,7 @@
 Jonas Westheider, Julius Rückin, Marija Popovic
 University of Bonn
 
-This repository contains the implementation of our paper [Multi-UAV Adaptive Path Planning Using Deep Reinforcement Learning](https://arxiv.org/pdf/2303.01150.pdf) submitted to IROS2023 (under review).
+This repository contains the implementation of our paper [Multi-UAV Adaptive Path Planning Using Deep Reinforcement Learning](https://arxiv.org/pdf/2303.01150.pdf) submitted to IROS2023 (under review). The implementation is currently being cleaned up.
 
 
 <img src="https://user-images.githubusercontent.com/97049858/231695909-e0ee56fa-2c92-4b32-8176-ba95cf15d8fb.png" width="700" height="400">
@@ -16,3 +16,13 @@ Efficient aerial data collection is important in many remote sensing application
 
 
 Overview of our approach. At each time step during a mission, each UAV takes a measurement and updates its local map state. The local map is input to an actor network, which outputs a policy from which an action is sampled. During training, a centralised critic network is additionally trained using global map information and outputs Q-values for each action from the current state, i.e. the expected future return.
+
+
+Maintainer
+
+Jonas Westheider, jwestheider@uni-bonn.de, Ph.D. student at PhenoRob - University of Bonn.
+
+
+Funding
+
+This work was funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy - EXC 2070 – 390732324. Authors are with the Cluster of Excellence PhenoRob, Institute of Geodesy and Geoinformation, University of Bonn.
