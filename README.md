@@ -3,8 +3,10 @@
 Jonas Westheider, Julius Rückin, Marija Popovic
 University of Bonn
 
-This repository contains the implementation of our paper "Multi-UAV Adaptive Path Planning Using Deep Reinforcement Learning" submitted to IROS2023 (under review).
+This repository contains the implementation of our paper [Multi-UAV Adaptive Path Planning Using Deep Reinforcement Learning](https://arxiv.org/pdf/2303.01150.pdf) submitted to IROS2023 (under review).
 
+
+![teaser](https://user-images.githubusercontent.com/97049858/231695909-e0ee56fa-2c92-4b32-8176-ba95cf15d8fb.png)
 
 
 Efficient aerial data collection is important in many remote sensing applications. In large-scale monitoring scenarios, deploying a team of unmanned aerial vehicles (UAVs) offers improved spatial coverage and robustness against individual failures. However, a key challenge is cooperative path planning for the UAVs to efficiently achieve a joint mission goal. We propose a novel multi-agent informative path planning approach based on deep reinforcement learning for adaptive terrain monitoring scenarios using UAV teams. We introduce new network feature representations to effectively learn path planning in a 3D workspace. By leveraging a counterfactual baseline, our approach explicitly addresses credit assignment to learn cooperative behaviour. Our experimental evaluation shows improved planning performance, i.e. maps regions of interest more quickly, with respect to non-counterfactual vari- ants. Results on synthetic and real-world data show that our approach has superior performance compared to state-of-the-art non-learning-based methods, while being transferable to varying team sizes and communication constraints.
