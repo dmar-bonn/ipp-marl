@@ -31,9 +31,13 @@ Jonas Westheider, jwestheider@uni-bonn.de, Ph.D. student at PhenoRob - Universit
 ## Requirements
 
 matplotlib=3.5.1
+   
 numpy=1.22.2
+   
 opencv-python=4.5.5.62
+   
 scipy=1.8.1
+   
 torch=1.13.0+cu117
 
 
