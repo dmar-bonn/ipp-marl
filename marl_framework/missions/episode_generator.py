@@ -1,8 +1,6 @@
 import logging
 from typing import Dict, List
 
-import numpy as np
-from matplotlib import pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 
 from marl_framework.agent.agent import Agent
@@ -75,9 +73,6 @@ class EpisodeGenerator:
                 agent_positions.append(positions)
             agent_positions.append(new_positions)
             agent_altitudes.append(altitudes)
-
-            # if done:
-            #     break
 
         return (
             episode_return,

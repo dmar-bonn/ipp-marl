@@ -11,7 +11,13 @@ import seaborn as sns
 
 
 def plot_trajectories(
-        agent_positions, n_agents, writer, training_step_index, t_collision, budget, simulated_map
+    agent_positions,
+    n_agents,
+    writer,
+    training_step_index,
+    t_collision,
+    budget,
+    simulated_map,
 ):
 
     # colors = ["b", "g", "c", "r", "k", "w", "m", "y"]
@@ -47,7 +53,6 @@ def plot_trajectories(
 
     colors = ["c", "g", "m", "orange", "k", "w", "m", "y"]
 
-
     resolution = 0.1014
     # plt.figure()
 
@@ -57,8 +62,14 @@ def plot_trajectories(
     #     interpolation=cv2.INTER_AREA,
     # )
 
-    Y, X = np.meshgrid(range(0, 493), range(0, 493))    # 51
-    ax.plot_surface(Y, X, np.zeros_like(simulated_map), facecolors=cm.coolwarm(simulated_map), zorder=1)
+    Y, X = np.meshgrid(range(0, 493), range(0, 493))  # 51
+    ax.plot_surface(
+        Y,
+        X,
+        np.zeros_like(simulated_map),
+        facecolors=cm.coolwarm(simulated_map),
+        zorder=1,
+    )
     # plt.colorbar()
 
     for agent_id in range(n_agents):
@@ -86,10 +97,6 @@ def plot_trajectories(
     # fig.savefig(f"/home/penguin2/jonas-project/plots/coma_pathes_3d_{training_step_index}.png")
     # writer.add_figure(f"Agent trajectories", plt.gcf(), training_step_index, close=True)
 
-
-
-
-
     # ax = fig.gca(projection='3d')
     #
     # for agent_id in range(n_agents):
@@ -115,4 +122,5 @@ def plot_performance(budget, entropies):
     plt.plot(x, y)
     np.savetxt("/home/penguin2/jonas-project/plots/learned_new.txt", y, delimiter=",")
     plt.savefig(
-        f"/home/penguin2/jonas-project/plots/lawnmower_comparison_uncertainty_reduction.png")
+        f"/home/penguin2/jonas-project/plots/lawnmower_comparison_uncertainty_reduction.png"
+    )

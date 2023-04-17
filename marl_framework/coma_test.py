@@ -42,7 +42,9 @@ class COMATest:
         self.mapping = Mapping(self.grid_map, self.sensor, self.params, num_episode)
         self.agent_state_space = AgentStateSpace(self.params)
         self.map = self.mapping.init_priors()
-        self.device = torch.device("cpu")  # torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cpu"
+        )  # torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.batch_memory = BatchMemory(self.params, self.coma_wrapper)
 
     def execute(self, test_mode, num_episode):
@@ -79,8 +81,12 @@ class COMATest:
         # plt.clim(0, 1)
         # plt.savefig(f"/home/penguin2/Documents/plots/groundtruth.png")
 
-        entropy_map = get_w_entropy_map(None, self.map, self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-        map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+        entropy_map = get_w_entropy_map(
+            None, self.map, self.mapping.simulated_map, "eval", self.agent_state_space
+        )[0]
+        map_unique, map_counts = np.unique(
+            self.mapping.simulated_map, return_counts=True
+        )
         target_counts = map_counts[-1]
         entropy_masked = entropy_map.copy()
         entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -92,7 +98,13 @@ class COMATest:
 
         for t in range(self.budget + 1):
             global_information, positions, observations = self.coma_wrapper.build_observations(
-                self.mapping, agents, num_episode, t, self.params, self.batch_memory, None
+                self.mapping,
+                agents,
+                num_episode,
+                t,
+                self.params,
+                self.batch_memory,
+                None,
             )
 
             next_positions = []
@@ -102,42 +114,76 @@ class COMATest:
             altitudes = []
 
             if t == 0:
-                current_global_map = self.mapping.fuse_map(current_global_map, global_information, None, "global")
+                current_global_map = self.mapping.fuse_map(
+                    current_global_map, global_information, None, "global"
+                )
 
             for agent in range(self.n_agents):
                 input_state = observations[agent].to(self.device)
                 network_input = torch.unsqueeze(input_state, 0).float()
                 action_probs, _ = net.forward(network_input, 0)
-                action_mask, _ = agents[agent].action_space.get_action_mask(agents[agent].position)
-                action_mask = self.action_space.apply_collision_mask(agents[agent].position, action_mask,
-                                                                     next_positions, self.agent_state_space)
+                action_mask, _ = agents[agent].action_space.get_action_mask(
+                    agents[agent].position
+                )
+                action_mask = self.action_space.apply_collision_mask(
+                    agents[agent].position,
+                    action_mask,
+                    next_positions,
+                    self.agent_state_space,
+                )
                 action_mask = torch.tensor(action_mask).to(self.device)
                 action = torch.argmax(action_probs * action_mask)
 
                 if t == 0:
                     start_positions.append(agents[agent].position)
 
-                agents[agent].position = agents[agent].action_space.action_to_position(agents[agent].position,
-                                                                                       action.item())
+                agents[agent].position = agents[agent].action_space.action_to_position(
+                    agents[agent].position, action.item()
+                )
                 next_positions.append(agents[agent].position)
-                agents[agent].local_map, agents[agent].map_footprint, _, agents[agent].map2communicate, agents[agent].footprint_img = self.mapping.update_grid_map(agents[agent].position, agents[agent].local_map, t, None)
+                agents[agent].local_map, agents[agent].map_footprint, _, agents[
+                    agent
+                ].map2communicate, agents[
+                    agent
+                ].footprint_img = self.mapping.update_grid_map(
+                    agents[agent].position, agents[agent].local_map, t, None
+                )
                 next_maps.append(agents[agent].local_map)
                 maps2communicate_list.append(agents[agent].map2communicate)
                 altitudes.append(agents[agent].position[2])
             agent_altitudes.append(altitudes)
 
-            next_global_map = self.mapping.fuse_map(current_global_map, maps2communicate_list, None, "global")
+            next_global_map = self.mapping.fuse_map(
+                current_global_map, maps2communicate_list, None, "global"
+            )
             current_global_map = next_global_map.copy()
 
             if t == 0:
                 agent_positions.append(start_positions)
             agent_positions.append(next_positions)
-            done, relative_reward, reward = get_global_reward(current_global_map, next_global_map, None, None,
-                                                              self.mapping.simulated_map,
-                                                              self.agent_state_space, None, None, t, self.budget)
+            done, relative_reward, reward = get_global_reward(
+                current_global_map,
+                next_global_map,
+                None,
+                None,
+                self.mapping.simulated_map,
+                self.agent_state_space,
+                None,
+                None,
+                t,
+                self.budget,
+            )
 
-            entropy_map = get_w_entropy_map(None, next_global_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-            map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+            entropy_map = get_w_entropy_map(
+                None,
+                next_global_map,
+                self.mapping.simulated_map,
+                "eval",
+                self.agent_state_space,
+            )[0]
+            map_unique, map_counts = np.unique(
+                self.mapping.simulated_map, return_counts=True
+            )
             target_counts = map_counts[-1]
             entropy_masked = entropy_map.copy()
             entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -151,10 +197,26 @@ class COMATest:
             rewards.append(reward)
             relative_rewards.append(relative_reward)
 
-        return sum(rewards), agent_positions, agent_altitudes, entropies, rmses, sum(relative_rewards)
+        return (
+            sum(rewards),
+            agent_positions,
+            agent_altitudes,
+            entropies,
+            rmses,
+            sum(relative_rewards),
+        )
 
     def plot_mission(self, agent_positions, writer, entropies, trial):
-        plot_trajectories(agent_positions, self.n_agents, writer, trial, 0, self.budget, self.mapping.simulated_map)
+        plot_trajectories(
+            agent_positions,
+            self.n_agents,
+            writer,
+            trial,
+            0,
+            self.budget,
+            self.mapping.simulated_map,
+        )
+
     #     plot_performance(self.budget, entropies)
 
 
@@ -171,7 +233,7 @@ def save_mission_numbers(entropy_list, rmse_list, trials, budget):
     print(f"entropy_metrics: {entropy_metrics}")
     print(f"rmse_metrics: {rmse_metrics}")
 
-    with open('/home/penguin2/Documents/PAPER_PLOTS/iac_f1.json', 'w') as fp:
+    with open("/home/penguin2/Documents/PAPER_PLOTS/iac_f1.json", "w") as fp:
         json.dump([entropy_metrics, rmse_metrics], fp)
         ### json.dump(entropy_metrics, fp)
 
@@ -183,7 +245,9 @@ def main():
     trials = params["experiment"]["baselines"]["information_gain"]["trials"]
     budget = params["experiment"]["constraints"]["budget"]
     avg_return = None
-    test_mode = "random"  # "fix" for fix starting positions, "random" for random starting positions
+    test_mode = (
+        "random"
+    )  # "fix" for fix starting positions, "random" for random starting positions
     entropies_list = []
     rmse_list = []
     relative_returns = []
@@ -208,8 +272,11 @@ def main():
             print(f"Trial: {trial}")
             coma_test = COMATest(params, writer, trial)
             global_return, agent_positions, agent_altitudes, entropies, rmses, relative_return = coma_test.execute(
-                test_mode, trial)
-            altitude_list.append([item for sublist in agent_altitudes for item in sublist])
+                test_mode, trial
+            )
+            altitude_list.append(
+                [item for sublist in agent_altitudes for item in sublist]
+            )
             entropies_list.append(entropies)
             rmse_list.append(rmses)
             returns.append(global_return)

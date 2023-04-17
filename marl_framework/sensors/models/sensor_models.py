@@ -1,6 +1,4 @@
 import logging
-import numpy as np
-
 from typing import Dict
 
 logger = logging.getLogger(__name__)
@@ -21,4 +19,4 @@ class AltitudeSensorModel:
             noise = 0.265
         if altitude == 15:
             noise = 0.375
-        return noise   # self.coeff_a * (1 - np.exp(-self.coeff_b * altitude))   # float(noise)
+        return noise

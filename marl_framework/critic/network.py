@@ -1,12 +1,8 @@
 import logging
 from typing import Dict
 
-import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
-from marl_framework.batch_memory import BatchMemory
-from marl_framework.critic.transformations import get_network_input
 
 logger = logging.getLogger(__name__)
 

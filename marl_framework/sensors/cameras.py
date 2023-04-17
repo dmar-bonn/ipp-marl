@@ -43,9 +43,7 @@ class Camera(Sensor):
 
         return x_dim, y_dim
 
-    def project_field_of_view(
-        self, position: np.array, res_x, res_y
-    ) :
+    def project_field_of_view(self, position: np.array, res_x, res_y):
         """
         Project camera's FoV from a certain environment measurement position (and height) to planar
         top left and bottom right grid cells in grid map spanning the FoV.

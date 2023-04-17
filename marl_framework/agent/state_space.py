@@ -26,44 +26,27 @@ class AgentStateSpace:
         ]
 
     def get_random_agent_state(self, agent_id, episode):
-        # r = np.random.RandomState(seed=self.seed * episode * agent_id)
-        # state_x = self.spacing * r.randint(0, self.space_x_dim)
-        # state_y = self.spacing * r.randint(0, self.space_y_dim)
-        # state_z = 15  # self.spacing * r.randint(1, self.space_z_dim + 1)
+        r = np.random.RandomState(seed=self.seed * episode * agent_id)
+        state_x = self.spacing * r.randint(0, self.space_x_dim)
+        state_y = self.spacing * r.randint(0, self.space_y_dim)
+        state_z = 15  # self.spacing * r.randint(1, self.space_z_dim + 1)
 
-        if agent_id == 0:
-            state_x = 10   # self.spacing * r.randint(0, self.space_x_dim)
-            state_y = 10   # self.spacing * r.randint(0, self.space_y_dim)
-            state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
-        elif agent_id == 1:
-            state_x = 40   # self.spacing * r.randint(0, self.space_x_dim)
-            state_y = 10   # self.spacing * r.randint(0, self.space_y_dim)
-            state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
-        elif agent_id == 2:
-            state_x = 40   # self.spacing * r.randint(0, self.space_x_dim)
-            state_y = 40   # self.spacing * r.randint(0, self.space_y_dim)
-            state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
-        elif agent_id == 3:
-            state_x = 10   # self.spacing * r.randint(0, self.space_x_dim)
-            state_y = 40   # self.spacing * r.randint(0, self.space_y_dim)
-            state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
-
-        # if agent_id == 4:
-        #     state_x = 10   # self.spacing * r.randint(0, self.space_x_dim)
-        #     state_y = 25   # self.spacing * r.randint(0, self.space_y_dim)
-        #     state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
-        # elif agent_id == 5:
-        #     state_x = 25   # self.spacing * r.randint(0, self.space_x_dim)
-        #     state_y = 40  # 10   # self.spacing * r.randint(0, self.space_y_dim)
-        #     state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
-        # elif agent_id == 6:
-        #     state_x = 40   # self.spacing * r.randint(0, self.space_x_dim)
-        #     state_y = 25   # self.spacing * r.randint(0, self.space_y_dim)
-        #     state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
-        # elif agent_id == 7:
-        #     state_x = 25   # self.spacing * r.randint(0, self.space_x_dim)
-        #     state_y = 10   # self.spacing * r.randint(0, self.space_y_dim)
-        #     state_z = 15   # self.spacing * r.randint(1, self.space_z_dim + 1)
+        # if agent_id == 0:
+        #     state_x = 10
+        #     state_y = 10
+        #     state_z = 15
+        # elif agent_id == 1:
+        #     state_x = 40
+        #     state_y = 10
+        #     state_z = 15
+        # elif agent_id == 2:
+        #     state_x = 40
+        #     state_y = 40
+        #     state_z = 15
+        # elif agent_id == 3:
+        #     state_x = 10
+        #     state_y = 40
+        #     state_z = 15
 
         return np.array([state_x, state_y, state_z])
 

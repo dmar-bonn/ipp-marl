@@ -9,16 +9,16 @@ from utils.utils import compute_euclidean_distance
 
 
 def get_global_reward(
-        last_map,
-        next_map,
-        mission_type,
-        footprints,
-        simulated_map: np.array,
-        agent_state_space: AgentStateSpace,
-        actions,
-        agent_id,
-        t,
-        budget
+    last_map,
+    next_map,
+    mission_type,
+    footprints,
+    simulated_map: np.array,
+    agent_state_space: AgentStateSpace,
+    actions,
+    agent_id,
+    t,
+    budget,
 ):
     done = False
     reward = 0
@@ -30,11 +30,14 @@ def get_global_reward(
     p_max = 1
     fp_factor = 1
 
-    absolute_utility_reward, relative_utility_reward = get_utility_reward(last_map, next_map, simulated_map,
-                                                                          agent_state_space)
+    absolute_utility_reward, relative_utility_reward = get_utility_reward(
+        last_map, next_map, simulated_map, agent_state_space
+    )
     # print(f"absolute_utility_reward: {absolute_utility_reward}")
     absolute_reward = scale * absolute_utility_reward - offset
-    relative_reward = 22 * relative_utility_reward - 0.5 # / cost_factor - 0.35       # 22, 0.5
+    relative_reward = (
+        22 * relative_utility_reward - 0.5
+    )  # / cost_factor - 0.35       # 22, 0.5
 
     # if mission_type == "DeepQ":
     #     # footprint_penalty = get_footprint_penalty(footprints, agent_id, simulated_map, o_min, o_max, p_max)
@@ -43,16 +46,17 @@ def get_global_reward(
     #     absolute_reward = scale * absolute_utility_reward - offset
     #     reward += 34 * relative_utility_reward - 0.25
 
-    return done, relative_reward, absolute_reward   # done, relative_reward, absolute_reward
+    return (
+        done,
+        relative_reward,
+        absolute_reward,
+    )  # done, relative_reward, absolute_reward
 
 
 def get_collision_reward(next_positions, done):
     for agent1 in range(len(next_positions)):
         for agent2 in range(agent1):
-            done = is_collided(
-                next_positions[agent1],
-                next_positions[agent2],
-            )
+            done = is_collided(next_positions[agent1], next_positions[agent2])
             if done:
                 break
         if done:
@@ -62,12 +66,14 @@ def get_collision_reward(next_positions, done):
 
 
 def get_utility_reward(
-        state: np.array,
-        state_: np.array,
-        simulated_map: np.array,
-        agent_state_space: AgentStateSpace,
+    state: np.array,
+    state_: np.array,
+    simulated_map: np.array,
+    agent_state_space: AgentStateSpace,
 ):
-    entropy_before = get_w_entropy_map(None, state, simulated_map, "reward", agent_state_space)[2]
+    entropy_before = get_w_entropy_map(
+        None, state, simulated_map, "reward", agent_state_space
+    )[2]
     output = get_w_entropy_map(None, state_, simulated_map, "reward", agent_state_space)
     entropy_after = output[2]
     entropy_reduction = entropy_before - entropy_after
@@ -136,7 +142,9 @@ def get_footprint_penalty(footprints, agent_id, simulated_map, o_min, o_max, p_m
         if fp == agent_id:
             pass
         else:
-            overlap.append(compute_overlap(own_footprint, footprints[fp], simulated_map))
+            overlap.append(
+                compute_overlap(own_footprint, footprints[fp], simulated_map)
+            )
     mean_overlap = sum(overlap) / len(overlap)
     if mean_overlap > o_max:
         return 0

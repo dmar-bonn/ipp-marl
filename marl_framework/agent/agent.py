@@ -1,8 +1,6 @@
 import logging
 from typing import Dict
 
-import numpy as np
-from matplotlib import pyplot as plt
 
 from actor.network import ActorNetwork
 from agent.action_space import AgentActionSpace
@@ -14,12 +12,12 @@ logger = logging.getLogger(__name__)
 
 class Agent:
     def __init__(
-            self,
-            actor_network: ActorNetwork,
-            params: Dict,
-            mapping,
-            agent_id: int,
-            agent_state_space: AgentStateSpace,
+        self,
+        actor_network: ActorNetwork,
+        params: Dict,
+        mapping,
+        agent_id: int,
+        agent_state_space: AgentStateSpace,
     ):
         self.params = params
         self.agent_id = agent_id
@@ -40,7 +38,7 @@ class Agent:
         self.map2communicate = None
 
     def communicate(
-            self, t, num_episode, communication_log: CommunicationLog, mode
+        self, t, num_episode, communication_log: CommunicationLog, mode
     ) -> CommunicationLog:
         if t == 0:
             self.position = self.agent_state_space.get_random_agent_state(
@@ -50,7 +48,13 @@ class Agent:
                 self.position, self.local_map, t, mode
             )
 
-        agent_info = {"local_map": self.local_map, "position": self.position, "map_footprint": self.map_footprint, "map2communicate": self.map2communicate, "footprint_img": self.footprint_img}
+        agent_info = {
+            "local_map": self.local_map,
+            "position": self.position,
+            "map_footprint": self.map_footprint,
+            "map2communicate": self.map2communicate,
+            "footprint_img": self.footprint_img,
+        }
         global_log = communication_log.store_agent_message(agent_info, self.agent_id)
 
         return global_log, self.local_map, self.position
@@ -70,9 +74,11 @@ class Agent:
         # Get action mask for masking out currently invalid actions (outside of environment)
 
         action_mask_1d, _ = self.action_space.get_action_mask(self.position)
-        action_mask_1d = self.action_space.apply_collision_mask(self.position, action_mask_1d, next_other_positions, self.agent_state_space)
+        action_mask_1d = self.action_space.apply_collision_mask(
+            self.position, action_mask_1d, next_other_positions, self.agent_state_space
+        )
 
-        # ACTION CHOICE (here: based on RL)
+        # action choice
         probs, action, mask, eps = self.actor_network.get_action_index(
             batch_memory, action_mask_1d, self.agent_id, t, num_episode, mode
         )
@@ -83,15 +89,29 @@ class Agent:
             print("OUT OF MAP")
 
         # Sense and update grid map
-        self.local_map, self.map_footprint, footprint_idx, self.map2communicate, self.footprint_img = self.mapping.update_grid_map(self.position, self.local_map, t, mode)
+        self.local_map, self.map_footprint, footprint_idx, self.map2communicate, self.footprint_img = self.mapping.update_grid_map(
+            self.position, self.local_map, t, mode
+        )
         batch_memory.insert(-1, agent_id, action=action, mask=mask)
 
-        return self.local_map, self.position, eps, action, footprint_idx, self.map2communicate
+        return (
+            self.local_map,
+            self.position,
+            eps,
+            action,
+            footprint_idx,
+            self.map2communicate,
+        )
 
     def is_in_map(self, position):
-        if position[0] <= self.x_dim and position[0] >= 0 and position[1] <= self.y_dim and position[1] >= 0 and position[2] >= 5 and position[2] <= 15:
+        if (
+            position[0] <= self.x_dim
+            and position[0] >= 0
+            and position[1] <= self.y_dim
+            and position[1] >= 0
+            and position[2] >= 5
+            and position[2] <= 15
+        ):
             return True
         else:
             return False
-
-

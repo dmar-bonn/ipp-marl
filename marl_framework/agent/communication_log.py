@@ -14,12 +14,8 @@ class CommunicationLog:
         self.communication_range = self.params["experiment"]["uav"][
             "communication_range"
         ]
-        self.fix_range = self.params["experiment"]["uav"][
-            "fix_range"
-        ]
-        self.failure_rate = self.params["experiment"]["uav"][
-            "failure_rate"
-        ]
+        self.fix_range = self.params["experiment"]["uav"]["fix_range"]
+        self.failure_rate = self.params["experiment"]["uav"]["failure_rate"]
         self.n_agents = self.params["experiment"]["missions"]["n_agents"]
         self.global_log = dict()
 
@@ -50,13 +46,14 @@ class CommunicationLog:
             r = np.random.random_sample()
             if compute_euclidean_distance(agent_position, other_agent_position) < 0.001:
                 communication = True
-            if (0.001 <= compute_euclidean_distance(agent_position, other_agent_position) <= self.communication_range) and (r >= self.failure_rate):
+            if (
+                0.001
+                <= compute_euclidean_distance(agent_position, other_agent_position)
+                <= self.communication_range
+            ) and (r >= self.failure_rate):
                 communication = True
             if communication:
                 local_log[agent_id] = self.global_log[agent_id]
-
-            # if compute_euclidean_distance(agent_position, other_agent_position) <= self.communication_range:
-            #     local_log[agent_id] = self.global_log[agent_id]
 
         return local_log
 

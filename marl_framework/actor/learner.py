@@ -21,7 +21,7 @@ class ActorLearner:
         self.params = params
         self.n_actions = params["experiment"]["constraints"]["num_actions"]
         self.writer = writer
-        self.device = torch.device("cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor.to(self.device)
         self.batch_size = params["networks"]["batch_size"]
         self.n_agents = self.params["experiment"]["missions"]["n_agents"]
@@ -29,8 +29,7 @@ class ActorLearner:
         self.lr = params["networks"]["actor"]["learning_rate"]
         self.momentum = params["networks"]["actor"]["momentum"]
         self.gradient_norm = params["networks"]["actor"]["gradient_norm"]
-        self.optimizer = torch.optim.Adam(self.actor.parameters(),
-                                          lr=self.lr)  # optim.RMSprop(self.actor.parameters(), self.lr, self.momentum)
+        self.optimizer = torch.optim.Adam(self.actor.parameters(), lr=self.lr)
         self.optimizer.zero_grad()
         self.kl_loss = nn.KLDivLoss()
 
@@ -50,15 +49,15 @@ class ActorLearner:
                 batch_actions.append(batch_idx.action)
                 batch_masks.append(batch_idx.mask)
 
-            batch_probs, batch_hidden_states = self.actor.forward(               #
+            batch_probs, batch_hidden_states = self.actor.forward(
                 torch.stack(batch_observations).squeeze().to(self.device), eps
             )
             batch_log_probs = torch.log(batch_probs)
             with torch.no_grad():
-                batch_probs = batch_probs * torch.stack(batch_masks)               #
+                batch_probs = batch_probs * torch.stack(batch_masks)
                 batch_sum = batch_probs.sum(-1).unsqueeze(1).repeat(1, self.n_actions)
                 batch_sum[batch_sum < 0.00001] = 0.00001
-                batch_probs_norm = batch_probs/batch_sum
+                batch_probs_norm = batch_probs / batch_sum
                 batch_probs_norm[batch_probs_norm <= 0.00001] = 0.00001
                 batch_log_probs_norm = torch.log(batch_probs_norm)
 
@@ -74,10 +73,14 @@ class ActorLearner:
             batch_q_chosen = torch.gather(
                 batch_q_values, dim=1, index=torch.stack(batch_actions)
             )
-            baseline = (torch.exp(batch_log_probs_norm) * batch_q_values * torch.stack(batch_masks))
+            baseline = (
+                torch.exp(batch_log_probs_norm)
+                * batch_q_values
+                * torch.stack(batch_masks)
+            )
             baseline_sum = baseline.sum(-1)
 
-            batch_advantages = batch_q_chosen - baseline_sum.unsqueeze(1)        ##############S
+            batch_advantages = batch_q_chosen - baseline_sum.unsqueeze(1)
             batch_log_probs_chosen = torch.gather(
                 batch_log_probs, dim=1, index=torch.stack(batch_actions)
             )
@@ -85,7 +88,11 @@ class ActorLearner:
             log_probs_chosen.append(batch_log_probs_chosen)
             log_probs_all.append(batch_log_probs)
 
-            loss = -(batch_advantages.detach() * batch_log_probs_chosen * torch.stack(batch_masks)).mean()
+            loss = -(
+                batch_advantages.detach()
+                * batch_log_probs_chosen
+                * torch.stack(batch_masks)
+            ).mean()
             losses.append(loss)
 
             self.optimizer.zero_grad()
@@ -141,11 +148,22 @@ class ActorLearner:
                 torch.mean(torch.stack(advantages)),
                 torch.std(torch.stack(advantages)),
                 torch.mean(torch.stack(log_probs_chosen)),
-                np.mean(entropy(torch.exp(torch.stack(log_probs_all)).detach().cpu().numpy(), axis=2)),
+                np.mean(
+                    entropy(
+                        torch.exp(torch.stack(log_probs_all)).detach().cpu().numpy(),
+                        axis=2,
+                    )
+                ),
                 np.mean(kl_divergence),
                 np.mean(hidden_state_differences),
-                [conv1_grad_norm / conv1_count, conv2_grad_norm / conv2_count, conv3_grad_norm / conv3_count,
-                 fc1_grad_norm / fc1_count, 0, fc3_grad_norm / fc3_count]
+                [
+                    conv1_grad_norm / conv1_count,
+                    conv2_grad_norm / conv2_count,
+                    conv3_grad_norm / conv3_count,
+                    fc1_grad_norm / fc1_count,
+                    0,
+                    fc3_grad_norm / fc3_count,
+                ],
             ],
         )
 
@@ -157,7 +175,7 @@ class ActorLearner:
                 batch_observations.append(batch_idx.observation.float())
             with torch.no_grad():
                 batch_log_probs, _ = self.actor.forward(
-                    torch.stack(batch_observations).squeeze().to(self.device), eps,
+                    torch.stack(batch_observations).squeeze().to(self.device), eps
                 )
             log_probs_new.append(batch_log_probs)
         kl_divergence = sum(

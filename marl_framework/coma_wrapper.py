@@ -1,9 +1,6 @@
 import copy
 import logging
 from typing import Dict, List
-import numpy as np
-import torch
-from matplotlib import pyplot as plt
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -18,7 +15,6 @@ from marl_framework.critic.network import CriticNetwork
 from actor.transformations import get_network_input as get_actor_input
 from critic.transformations import get_network_input as get_critic_input
 from utils.reward import get_global_reward
-from utils.state import get_w_entropy_map
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +30,13 @@ class COMAWrapper:
         self.actor_learner = ActorLearner(
             self.params, writer, self.actor_network, self.agent_state_space
         )
-        self.q_network = QNetwork(self.params)
-        self.target_q_network = copy.deepcopy(self.q_network)
-        self.q_learner = QLearner(self.params, writer, self.q_network)
+        self.critic_network = CriticNetwork(self.params)
+        self.target_critic_network = copy.deepcopy(self.critic_network)
+        self.critic_learner = CriticLearner(self.params, writer, self.critic_network)
 
-    def build_observations(self, mapping, agents, num_episode, t, params, batch_memory, mode):
+    def build_observations(
+        self, mapping, agents, num_episode, t, params, batch_memory, mode
+    ):
         communication_log = CommunicationLog(self.params, num_episode)
         local_maps = []
         positions = []
@@ -52,7 +50,9 @@ class COMAWrapper:
 
         observations = []
         for agent_id in range(self.n_agents):
-            local_information, fused_local_map = agents[agent_id].receive_messages(communication_log, agent_id, t)
+            local_information, fused_local_map = agents[agent_id].receive_messages(
+                communication_log, agent_id, t
+            )
 
             observation = get_actor_input(
                 local_information,
@@ -71,17 +71,17 @@ class COMAWrapper:
         return global_information, positions, observations
 
     def steps(
-            self,
-            mapping,
-            t: int,
-            agents: List[Agent],
-            accumulated_map_knowledge,
-            num_episode,
-            batch_memory,
-            global_information,
-            simulated_map,
-            params,
-            mode,
+        self,
+        mapping,
+        t: int,
+        agents: List[Agent],
+        accumulated_map_knowledge,
+        num_episode,
+        batch_memory,
+        global_information,
+        simulated_map,
+        params,
+        mode,
     ):
         next_maps = []
         next_positions = []
@@ -90,11 +90,14 @@ class COMAWrapper:
         altitudes = []
         maps2communicate = []
 
-        # if t == 0:
-        critic_map_knowledge = mapping.fuse_map(accumulated_map_knowledge, global_information, mode, "global")
+        critic_map_knowledge = mapping.fuse_map(
+            accumulated_map_knowledge, global_information, mode, "global"
+        )
 
         for agent_id in range(self.n_agents):
-            next_map, next_position, eps, action, footprint_idx, map2communicate = agents[agent_id].step(
+            next_map, next_position, eps, action, footprint_idx, map2communicate = agents[
+                agent_id
+            ].step(
                 agent_id, t, num_episode, batch_memory, mode, next_positions
             )
             next_maps.append(next_map)
@@ -109,8 +112,24 @@ class COMAWrapper:
 
         if self.mission_type == "DeepQ":
             for agent_id in range(self.n_agents):
-                update_simulation = mapping.fuse_map(critic_map_knowledge.copy(), [maps2communicate[agent_id]], agent_id, "global")
-                done, relative_reward, absolute_reward = get_global_reward(critic_map_knowledge, update_simulation, self.mission_type, footprints, simulated_map, self.agent_state_space, actions[agent_id], agent_id, t, self.budget)
+                update_simulation = mapping.fuse_map(
+                    critic_map_knowledge.copy(),
+                    [maps2communicate[agent_id]],
+                    agent_id,
+                    "global",
+                )
+                done, relative_reward, absolute_reward = get_global_reward(
+                    critic_map_knowledge,
+                    update_simulation,
+                    self.mission_type,
+                    footprints,
+                    simulated_map,
+                    self.agent_state_space,
+                    actions[agent_id],
+                    agent_id,
+                    t,
+                    self.budget,
+                )
                 batch_memory.insert(-1, agent_id, reward=relative_reward)
 
         for agent_id in range(self.n_agents):
@@ -123,7 +142,9 @@ class COMAWrapper:
                 simulated_map,
                 params,
             )
-        next_global_map = mapping.fuse_map(accumulated_map_knowledge, global_information, mode, "global")
+        next_global_map = mapping.fuse_map(
+            accumulated_map_knowledge, global_information, mode, "global"
+        )
 
         if self.mission_type == "COMA":
             done, relative_reward, absolute_reward = get_global_reward(
@@ -136,12 +157,11 @@ class COMAWrapper:
                 actions,
                 None,
                 t,
-                self.budget
+                self.budget,
             )
 
         if t == self.budget:
             done = True
-            # reward += 0.5
 
         if self.mission_type == "COMA":
             for agent_id in range(self.n_agents):
@@ -161,6 +181,3 @@ class COMAWrapper:
             altitudes,
             next_global_map,
         )
-
-
-

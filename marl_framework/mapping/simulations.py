@@ -3,7 +3,6 @@ from typing import Dict
 
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
 
 from mapping import ground_truths
 from mapping.grid_maps import GridMap
@@ -16,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 class Simulation:
     def __init__(
-            self,
-            params: Dict,
-            sensor: Sensor,
-            episode: int,
-            sensor_model: AltitudeSensorModel,
+        self,
+        params: Dict,
+        sensor: Sensor,
+        episode: int,
+        sensor_model: AltitudeSensorModel,
     ):
         self.params = params
         self.sensor = sensor
@@ -42,8 +41,8 @@ class Simulation:
 
     def get_measurement(self, altitude, footprint, mode):
         map_section = self.simulated_map[
-                      footprint[2]: footprint[3], footprint[0]: footprint[1]
-                      ].copy()
+            footprint[2] : footprint[3], footprint[0] : footprint[1]
+        ].copy()
         sensor_noise = self.sensor_model.get_noise_variance(altitude)
         new_grid_value = np.round(
             self.get_noisy_map_section(sensor_noise, map_section, mode), 3
@@ -53,14 +52,10 @@ class Simulation:
 
     @staticmethod
     def get_noisy_map_section(sensor_noise, map_section, mode):
-        # if mode == "train":
-        # accuracy = 1 - sensor_noise
-        # grid_value = accuracy * map_section
-        # np.putmask(grid_value, (1 - accuracy) > grid_value, 1 - accuracy)
-        # else:
-
         accuracy = 1 - sensor_noise
-        correctness = torch.multinomial(torch.tensor([sensor_noise, accuracy]), map_section.size, replacement=True)
+        correctness = torch.multinomial(
+            torch.tensor([sensor_noise, accuracy]), map_section.size, replacement=True
+        )
         correctness = torch.reshape(correctness, np.shape(map_section)).numpy()
         grid_value = map_section.copy()
         grid_value = np.where(correctness == 0, abs(grid_value - 1), grid_value)

@@ -45,129 +45,161 @@ class LawnMower:
         entropies = []
         rmses = []
         # if self.n_agents == 2 and self.altitude == 10 and self.budget == 14:
-        positions1 = np.array([[10, 10, self.altitude],
-                               [15, 10, self.altitude],
-                               [20, 10, self.altitude],
-                               [25, 10, self.altitude],
-                               [30, 10, self.altitude],
-                               [35, 10, self.altitude],
-                               [40, 10, self.altitude],
-                               [40, 15, self.altitude],
-                               [40, 20, self.altitude],
-                               [35, 20, self.altitude],
-                               [30, 20, self.altitude],
-                               [25, 20, self.altitude],
-                               [20, 20, self.altitude],
-                               [15, 20, self.altitude],
-                               [10, 20, self.altitude]])
-        positions2 = np.array([[10, 30, self.altitude],
-                               [15, 30, self.altitude],
-                               [20, 30, self.altitude],
-                               [25, 30, self.altitude],
-                               [30, 30, self.altitude],
-                               [35, 30, self.altitude],
-                               [40, 30, self.altitude],
-                               [40, 35, self.altitude],
-                               [40, 40, self.altitude],
-                               [35, 40, self.altitude],
-                               [30, 40, self.altitude],
-                               [25, 40, self.altitude],
-                               [20, 40, self.altitude],
-                               [15, 40, self.altitude],
-                               [10, 40, self.altitude]])
+        positions1 = np.array(
+            [
+                [10, 10, self.altitude],
+                [15, 10, self.altitude],
+                [20, 10, self.altitude],
+                [25, 10, self.altitude],
+                [30, 10, self.altitude],
+                [35, 10, self.altitude],
+                [40, 10, self.altitude],
+                [40, 15, self.altitude],
+                [40, 20, self.altitude],
+                [35, 20, self.altitude],
+                [30, 20, self.altitude],
+                [25, 20, self.altitude],
+                [20, 20, self.altitude],
+                [15, 20, self.altitude],
+                [10, 20, self.altitude],
+            ]
+        )
+        positions2 = np.array(
+            [
+                [10, 30, self.altitude],
+                [15, 30, self.altitude],
+                [20, 30, self.altitude],
+                [25, 30, self.altitude],
+                [30, 30, self.altitude],
+                [35, 30, self.altitude],
+                [40, 30, self.altitude],
+                [40, 35, self.altitude],
+                [40, 40, self.altitude],
+                [35, 40, self.altitude],
+                [30, 40, self.altitude],
+                [25, 40, self.altitude],
+                [20, 40, self.altitude],
+                [15, 40, self.altitude],
+                [10, 40, self.altitude],
+            ]
+        )
         # if self.n_agents == 4 and self.altitude == 10 and self.budget == 14:
-        positions3 = np.array([[10, 10, self.altitude],
-                               [10, 15, self.altitude],
-                               [10, 20, self.altitude],
-                               [10, 25, self.altitude],
-                               [10, 30, self.altitude],
-                               [10, 35, self.altitude],
-                               [10, 40, self.altitude],
-                               [15, 40, self.altitude],
-                               [20, 40, self.altitude],
-                               [20, 35, self.altitude],
-                               [20, 30, self.altitude],
-                               [20, 25, self.altitude],
-                               [20, 20, self.altitude],
-                               [20, 15, self.altitude],
-                               [20, 10, self.altitude]])
-        positions4 = np.array([[30, 10, self.altitude],
-                               [30, 15, self.altitude],
-                               [30, 20, self.altitude],
-                               [30, 25, self.altitude],
-                               [30, 30, self.altitude],
-                               [30, 35, self.altitude],
-                               [30, 40, self.altitude],
-                               [35, 40, self.altitude],
-                               [40, 40, self.altitude],
-                               [40, 35, self.altitude],
-                               [40, 30, self.altitude],
-                               [40, 25, self.altitude],
-                               [40, 20, self.altitude],
-                               [40, 15, self.altitude],
-                               [40, 10, self.altitude]])
+        positions3 = np.array(
+            [
+                [10, 10, self.altitude],
+                [10, 15, self.altitude],
+                [10, 20, self.altitude],
+                [10, 25, self.altitude],
+                [10, 30, self.altitude],
+                [10, 35, self.altitude],
+                [10, 40, self.altitude],
+                [15, 40, self.altitude],
+                [20, 40, self.altitude],
+                [20, 35, self.altitude],
+                [20, 30, self.altitude],
+                [20, 25, self.altitude],
+                [20, 20, self.altitude],
+                [20, 15, self.altitude],
+                [20, 10, self.altitude],
+            ]
+        )
+        positions4 = np.array(
+            [
+                [30, 10, self.altitude],
+                [30, 15, self.altitude],
+                [30, 20, self.altitude],
+                [30, 25, self.altitude],
+                [30, 30, self.altitude],
+                [30, 35, self.altitude],
+                [30, 40, self.altitude],
+                [35, 40, self.altitude],
+                [40, 40, self.altitude],
+                [40, 35, self.altitude],
+                [40, 30, self.altitude],
+                [40, 25, self.altitude],
+                [40, 20, self.altitude],
+                [40, 15, self.altitude],
+                [40, 10, self.altitude],
+            ]
+        )
 
-        positions5 = np.array([[10, 10, self.altitude],
-                               [15, 10, self.altitude],
-                               [20, 10, self.altitude],
-                               [25, 10, self.altitude],
-                               [30, 10, self.altitude],
-                               [35, 10, self.altitude],
-                               [40, 10, self.altitude],
-                               [40, 15, self.altitude],
-                               [40, 20, self.altitude],
-                               [35, 20, self.altitude],
-                               [30, 20, self.altitude],
-                               [25, 20, self.altitude],
-                               [20, 20, self.altitude],
-                               [15, 20, self.altitude],
-                               [10, 20, self.altitude]])
-        positions6 = np.array([[10, 30, self.altitude],
-                               [15, 30, self.altitude],
-                               [20, 30, self.altitude],
-                               [25, 30, self.altitude],
-                               [30, 30, self.altitude],
-                               [35, 30, self.altitude],
-                               [40, 30, self.altitude],
-                               [40, 35, self.altitude],
-                               [40, 40, self.altitude],
-                               [35, 40, self.altitude],
-                               [30, 40, self.altitude],
-                               [25, 40, self.altitude],
-                               [20, 40, self.altitude],
-                               [15, 40, self.altitude],
-                               [10, 40, self.altitude]])
+        positions5 = np.array(
+            [
+                [10, 10, self.altitude],
+                [15, 10, self.altitude],
+                [20, 10, self.altitude],
+                [25, 10, self.altitude],
+                [30, 10, self.altitude],
+                [35, 10, self.altitude],
+                [40, 10, self.altitude],
+                [40, 15, self.altitude],
+                [40, 20, self.altitude],
+                [35, 20, self.altitude],
+                [30, 20, self.altitude],
+                [25, 20, self.altitude],
+                [20, 20, self.altitude],
+                [15, 20, self.altitude],
+                [10, 20, self.altitude],
+            ]
+        )
+        positions6 = np.array(
+            [
+                [10, 30, self.altitude],
+                [15, 30, self.altitude],
+                [20, 30, self.altitude],
+                [25, 30, self.altitude],
+                [30, 30, self.altitude],
+                [35, 30, self.altitude],
+                [40, 30, self.altitude],
+                [40, 35, self.altitude],
+                [40, 40, self.altitude],
+                [35, 40, self.altitude],
+                [30, 40, self.altitude],
+                [25, 40, self.altitude],
+                [20, 40, self.altitude],
+                [15, 40, self.altitude],
+                [10, 40, self.altitude],
+            ]
+        )
         # if self.n_agents == 4 and self.altitude == 10 and self.budget == 14:
-        positions7 = np.array([[10, 10, self.altitude],
-                               [10, 15, self.altitude],
-                               [10, 20, self.altitude],
-                               [10, 25, self.altitude],
-                               [10, 30, self.altitude],
-                               [10, 35, self.altitude],
-                               [10, 40, self.altitude],
-                               [15, 40, self.altitude],
-                               [20, 40, self.altitude],
-                               [20, 35, self.altitude],
-                               [20, 30, self.altitude],
-                               [20, 25, self.altitude],
-                               [20, 20, self.altitude],
-                               [20, 15, self.altitude],
-                               [20, 10, self.altitude]])
-        positions8 = np.array([[30, 10, self.altitude],
-                               [30, 15, self.altitude],
-                               [30, 20, self.altitude],
-                               [30, 25, self.altitude],
-                               [30, 30, self.altitude],
-                               [30, 35, self.altitude],
-                               [30, 40, self.altitude],
-                               [35, 40, self.altitude],
-                               [40, 40, self.altitude],
-                               [40, 35, self.altitude],
-                               [40, 30, self.altitude],
-                               [40, 25, self.altitude],
-                               [40, 20, self.altitude],
-                               [40, 15, self.altitude],
-                               [40, 10, self.altitude]])
+        positions7 = np.array(
+            [
+                [10, 10, self.altitude],
+                [10, 15, self.altitude],
+                [10, 20, self.altitude],
+                [10, 25, self.altitude],
+                [10, 30, self.altitude],
+                [10, 35, self.altitude],
+                [10, 40, self.altitude],
+                [15, 40, self.altitude],
+                [20, 40, self.altitude],
+                [20, 35, self.altitude],
+                [20, 30, self.altitude],
+                [20, 25, self.altitude],
+                [20, 20, self.altitude],
+                [20, 15, self.altitude],
+                [20, 10, self.altitude],
+            ]
+        )
+        positions8 = np.array(
+            [
+                [30, 10, self.altitude],
+                [30, 15, self.altitude],
+                [30, 20, self.altitude],
+                [30, 25, self.altitude],
+                [30, 30, self.altitude],
+                [30, 35, self.altitude],
+                [30, 40, self.altitude],
+                [35, 40, self.altitude],
+                [40, 40, self.altitude],
+                [40, 35, self.altitude],
+                [40, 30, self.altitude],
+                [40, 25, self.altitude],
+                [40, 20, self.altitude],
+                [40, 15, self.altitude],
+                [40, 10, self.altitude],
+            ]
+        )
 
         # for pos1, pos2 in zip(positions1, positions2):
         #     batch_memory.add(0, state=pos1)
@@ -179,7 +211,16 @@ class LawnMower:
         #     batch_memory.add(2, state=pos3)
         #     batch_memory.add(3, state=pos4)
 
-        for pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8 in zip(positions1, positions2, positions3, positions4, positions5, positions6, positions7, positions8):
+        for pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8 in zip(
+            positions1,
+            positions2,
+            positions3,
+            positions4,
+            positions5,
+            positions6,
+            positions7,
+            positions8,
+        ):
             batch_memory.add(0, state=pos1)
             batch_memory.add(1, state=pos2)
             batch_memory.add(2, state=pos3)
@@ -189,8 +230,16 @@ class LawnMower:
             batch_memory.add(6, state=pos7)
             batch_memory.add(7, state=pos8)
 
-        entropy_map = get_w_entropy_map(None, self.map.copy(), self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-        map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+        entropy_map = get_w_entropy_map(
+            None,
+            self.map.copy(),
+            self.mapping.simulated_map,
+            "eval",
+            self.agent_state_space,
+        )[0]
+        map_unique, map_counts = np.unique(
+            self.mapping.simulated_map, return_counts=True
+        )
         target_counts = map_counts[-1]
         entropy_masked = entropy_map.copy()
         entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -203,28 +252,52 @@ class LawnMower:
 
         for pos_idx in range(len(positions1)):
             position1 = batch_memory.get(pos_idx, 0, "state")
-            updated_map, _, _, _, _ = self.mapping.update_grid_map(position1, self.map.copy(), pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position1, self.map.copy(), pos_idx, None
+            )
             position2 = batch_memory.get(pos_idx, 1, "state")
-            updated_map, _, _, _, _  = self.mapping.update_grid_map(position2, updated_map.copy(), pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position2, updated_map.copy(), pos_idx, None
+            )
             position3 = batch_memory.get(pos_idx, 2, "state")
-            updated_map, _, _, _, _  = self.mapping.update_grid_map(position3, updated_map.copy(), pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position3, updated_map.copy(), pos_idx, None
+            )
             position4 = batch_memory.get(pos_idx, 3, "state")
-            updated_map, _, _, _, _  = self.mapping.update_grid_map(position4, updated_map.copy(), pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position4, updated_map.copy(), pos_idx, None
+            )
 
             position5 = batch_memory.get(pos_idx, 4, "state")
-            updated_map, _, _, _, _ = self.mapping.update_grid_map(position5, updated_map.copy(), pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position5, updated_map.copy(), pos_idx, None
+            )
             position6 = batch_memory.get(pos_idx, 5, "state")
-            updated_map, _, _, _, _ = self.mapping.update_grid_map(position6, updated_map, pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position6, updated_map, pos_idx, None
+            )
             position7 = batch_memory.get(pos_idx, 6, "state")
-            updated_map, _, _, _, _ = self.mapping.update_grid_map(position7, updated_map, pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position7, updated_map, pos_idx, None
+            )
             position8 = batch_memory.get(pos_idx, 7, "state")
-            updated_map, _, _, _, _ = self.mapping.update_grid_map(position8, updated_map, pos_idx, None)
+            updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                position8, updated_map, pos_idx, None
+            )
 
             # _, reward, _ = get_global_reward(self.map, updated_map, None, None, self.mapping.simulated_map,
             #                               self.agent_state_space, None, None)
 
-            entropy_map = get_w_entropy_map(None, updated_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-            map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+            entropy_map = get_w_entropy_map(
+                None,
+                updated_map,
+                self.mapping.simulated_map,
+                "eval",
+                self.agent_state_space,
+            )[0]
+            map_unique, map_counts = np.unique(
+                self.mapping.simulated_map, return_counts=True
+            )
             target_counts = map_counts[-1]
             entropy_masked = entropy_map.copy()
             entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -256,7 +329,9 @@ def save_mission_numbers(entropy_list, rmse_list, trials, budget):
     print(f"entropy_metrics: {entropy_metrics}")
     print(f"rmse_metrics: {rmse_metrics}")
 
-    with open('/home/penguin2/Documents/PAPER_PLOTS/coverage_8agents_f1.json', 'w') as fp:
+    with open(
+        "/home/penguin2/Documents/PAPER_PLOTS/coverage_8agents_f1.json", "w"
+    ) as fp:
         json.dump([entropy_metrics, rmse_metrics], fp)
         # json.dump(entropy_metrics, fp)
 

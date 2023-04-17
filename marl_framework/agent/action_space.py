@@ -108,37 +108,78 @@ class AgentActionSpace:
             )
 
             if position[0] == 0 and position[1] == 0:
-                mask = np.array([[[0, 0, 0], [0, 1, 1], [0, 1, 1]],
-                                [[0, 0, 0], [0, 1, 1], [0, 1, 1]],
-                                 [[0, 0, 0], [0, 1, 1], [0, 1, 1]]])
+                mask = np.array(
+                    [
+                        [[0, 0, 0], [0, 1, 1], [0, 1, 1]],
+                        [[0, 0, 0], [0, 1, 1], [0, 1, 1]],
+                        [[0, 0, 0], [0, 1, 1], [0, 1, 1]],
+                    ]
+                )
             if position[0] == 0 and 0 < position[1] < self.environment_y_dim:
-                mask = np.array([[[0, 0, 0], [1, 1, 1], [1, 1, 1]],
-                                [[0, 0, 0], [1, 1, 1], [1, 1, 1]],
-                                [[0, 0, 0], [1, 1, 1], [1, 1, 1]]])
+                mask = np.array(
+                    [
+                        [[0, 0, 0], [1, 1, 1], [1, 1, 1]],
+                        [[0, 0, 0], [1, 1, 1], [1, 1, 1]],
+                        [[0, 0, 0], [1, 1, 1], [1, 1, 1]],
+                    ]
+                )
             if position[0] == 0 and position[1] == self.environment_y_dim:
-                mask = np.array([[[0, 0, 0], [1, 1, 0], [1, 1, 0]],
-                                [[0, 0, 0], [1, 1, 0], [1, 1, 0]],
-                                [[0, 0, 0], [1, 1, 0], [1, 1, 0]]])
-            if 0 < position[0] < self.environment_x_dim and position[1] == self.environment_y_dim:
-                mask = np.array([[[1, 1, 0], [1, 1, 0], [1, 1, 0]],
-                                [[1, 1, 0], [1, 1, 0], [1, 1, 0]],
-                                [[1, 1, 0], [1, 1, 0], [1, 1, 0]]])
-            if position[0] == self.environment_x_dim and position[1] == self.environment_y_dim:
-                mask = np.array([[[1, 1, 0], [1, 1, 0], [0, 0, 0]],
-                                [[1, 1, 0], [1, 1, 0], [0, 0, 0]],
-                                [[1, 1, 0], [1, 1, 0], [0, 0, 0]]])
-            if position[0] == self.environment_x_dim and 0 < position[1] < self.environment_y_dim:
-                mask = np.array([[[1, 1, 1], [1, 1, 1], [0, 0, 0]],
-                                 [[1, 1, 1], [1, 1, 1], [0, 0, 0]],
-                                 [[1, 1, 1], [1, 1, 1], [0, 0, 0]]])
+                mask = np.array(
+                    [
+                        [[0, 0, 0], [1, 1, 0], [1, 1, 0]],
+                        [[0, 0, 0], [1, 1, 0], [1, 1, 0]],
+                        [[0, 0, 0], [1, 1, 0], [1, 1, 0]],
+                    ]
+                )
+            if (
+                0 < position[0] < self.environment_x_dim
+                and position[1] == self.environment_y_dim
+            ):
+                mask = np.array(
+                    [
+                        [[1, 1, 0], [1, 1, 0], [1, 1, 0]],
+                        [[1, 1, 0], [1, 1, 0], [1, 1, 0]],
+                        [[1, 1, 0], [1, 1, 0], [1, 1, 0]],
+                    ]
+                )
+            if (
+                position[0] == self.environment_x_dim
+                and position[1] == self.environment_y_dim
+            ):
+                mask = np.array(
+                    [
+                        [[1, 1, 0], [1, 1, 0], [0, 0, 0]],
+                        [[1, 1, 0], [1, 1, 0], [0, 0, 0]],
+                        [[1, 1, 0], [1, 1, 0], [0, 0, 0]],
+                    ]
+                )
+            if (
+                position[0] == self.environment_x_dim
+                and 0 < position[1] < self.environment_y_dim
+            ):
+                mask = np.array(
+                    [
+                        [[1, 1, 1], [1, 1, 1], [0, 0, 0]],
+                        [[1, 1, 1], [1, 1, 1], [0, 0, 0]],
+                        [[1, 1, 1], [1, 1, 1], [0, 0, 0]],
+                    ]
+                )
             if position[0] == self.environment_x_dim and position[1] == 0:
-                mask = np.array([[[0, 1, 1], [0, 1, 1], [0, 0, 0]],
-                                 [[0, 1, 1], [0, 1, 1], [0, 0, 0]],
-                                 [[0, 1, 1], [0, 1, 1], [0, 0, 0]]])
+                mask = np.array(
+                    [
+                        [[0, 1, 1], [0, 1, 1], [0, 0, 0]],
+                        [[0, 1, 1], [0, 1, 1], [0, 0, 0]],
+                        [[0, 1, 1], [0, 1, 1], [0, 0, 0]],
+                    ]
+                )
             if (0 < position[0] < self.environment_x_dim) and (position[1] == 0):
-                mask = np.array([[[0, 1, 1], [0, 1, 1], [0, 1, 1]],
-                                 [[0, 1, 1], [0, 1, 1], [0, 1, 1]],
-                                 [[0, 1, 1], [0, 1, 1], [0, 1, 1]]])
+                mask = np.array(
+                    [
+                        [[0, 1, 1], [0, 1, 1], [0, 1, 1]],
+                        [[0, 1, 1], [0, 1, 1], [0, 1, 1]],
+                        [[0, 1, 1], [0, 1, 1], [0, 1, 1]],
+                    ]
+                )
 
             mask = np.transpose(mask, (1, 2, 0))
 
@@ -265,10 +306,14 @@ class AgentActionSpace:
 
         return position
 
-    def apply_collision_mask(self, position, mask, next_other_positions, agent_state_space):
+    def apply_collision_mask(
+        self, position, mask, next_other_positions, agent_state_space
+    ):
 
         for other_position in next_other_positions:
-            relative_idx = agent_state_space.position_to_index(other_position) - agent_state_space.position_to_index(position)
+            relative_idx = agent_state_space.position_to_index(
+                other_position
+            ) - agent_state_space.position_to_index(position)
 
             if self.num_actions == 4:
                 if relative_idx[0] == -1 and relative_idx[1] == 0:
@@ -333,106 +378,210 @@ class AgentActionSpace:
                         mask[8] = 1
 
             elif self.num_actions == 27:
-                if relative_idx[0] == -1 and relative_idx[1] == -1 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == 1
+                ):
                     mask[0] = 0
                     mask[9] = 0
                     mask[18] = 0
-                if relative_idx[0] == -1 and relative_idx[1] == 0 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == 1
+                ):
                     mask[1] = 0
                     mask[10] = 0
                     mask[19] = 0
-                if relative_idx[0] == -1 and relative_idx[1] == 1 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == 1
+                ):
                     mask[2] = 0
                     mask[11] = 0
                     mask[20] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == -1 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == 1
+                ):
                     mask[3] = 0
                     mask[12] = 0
                     mask[21] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == 0 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == 1
+                ):
                     mask[4] = 0
                     mask[22] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == 1 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == 1
+                ):
                     mask[5] = 0
                     mask[14] = 0
                     mask[23] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == -1 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == 1
+                ):
                     mask[6] = 0
                     mask[15] = 0
                     mask[24] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == 0 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == 1
+                ):
                     mask[7] = 0
                     mask[16] = 0
                     mask[25] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == 1 and relative_idx[2] == 1:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == 1
+                ):
                     mask[8] = 0
                     mask[17] = 0
                     mask[26] = 0
-                if relative_idx[0] == -1 and relative_idx[1] == -1 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == 0
+                ):
                     mask[0] = 0
                     mask[9] = 0
                     mask[18] = 0
-                if relative_idx[0] == -1 and relative_idx[1] == 0 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == 0
+                ):
                     mask[1] = 0
                     mask[10] = 0
                     mask[19] = 0
-                if relative_idx[0] == -1 and relative_idx[1] == 1 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == 0
+                ):
                     mask[2] = 0
                     mask[11] = 0
                     mask[20] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == -1 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == 0
+                ):
                     mask[3] = 0
                     mask[12] = 0
                     mask[21] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == 1 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == 0
+                ):
                     mask[5] = 0
                     mask[14] = 0
                     mask[23] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == -1 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == 0
+                ):
                     mask[6] = 0
                     mask[15] = 0
                     mask[24] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == 0 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == 0
+                ):
                     mask[7] = 0
                     mask[16] = 0
                     mask[25] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == 1 and relative_idx[2] == 0:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == 0
+                ):
                     mask[8] = 0
                     mask[17] = 0
                     mask[26] = 0
 
-                if relative_idx[0] == -1 and relative_idx[1] == -1 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == -1
+                ):
                     mask[0] = 0
                     mask[9] = 0
                     mask[18] = 0
-                if relative_idx[0] == -1 and relative_idx[1] == 0 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == -1
+                ):
                     mask[1] = 0
                     mask[10] = 0
                     mask[19] = 0
-                if relative_idx[0] == -1 and relative_idx[1] == 1 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == -1
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == -1
+                ):
                     mask[2] = 0
                     mask[11] = 0
                     mask[20] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == -1 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == -1
+                ):
                     mask[3] = 0
                     mask[12] = 0
                     mask[21] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == 0 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == -1
+                ):
                     mask[4] = 0
                     mask[22] = 0
-                if relative_idx[0] == 0 and relative_idx[1] == 1 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == 0
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == -1
+                ):
                     mask[5] = 0
                     mask[14] = 0
                     mask[23] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == -1 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == -1
+                    and relative_idx[2] == -1
+                ):
                     mask[6] = 0
                     mask[15] = 0
                     mask[24] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == 0 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == 0
+                    and relative_idx[2] == -1
+                ):
                     mask[7] = 0
                     mask[16] = 0
                     mask[25] = 0
-                if relative_idx[0] == 1 and relative_idx[1] == 1 and relative_idx[2] == -1:
+                if (
+                    relative_idx[0] == 1
+                    and relative_idx[1] == 1
+                    and relative_idx[2] == -1
+                ):
                     mask[8] = 0
                     mask[17] = 0
                     mask[26] = 0

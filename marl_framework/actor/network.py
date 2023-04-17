@@ -1,7 +1,5 @@
 import logging
 from typing import Dict
-
-import numpy as np
 import torch
 from torch import nn
 
@@ -29,7 +27,7 @@ class ActorNetwork(nn.Module):
         self.fc2 = nn.Linear(256, 256)
         self.fc3 = nn.Linear(256, self.n_actions)
 
-        self.device = torch.device("cpu")  # torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.softmax = nn.Softmax(dim=1)
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.hidden_states = [[]] * self.n_agents
@@ -62,31 +60,18 @@ class ActorNetwork(nn.Module):
         with torch.no_grad():
             action_probs, _ = self.forward(input_state.float(), eps)
 
-        # action_probs = torch.squeeze(torch.exp(log_action_probs)) * action_mask_1d
-
-        edge_penalty = 0
-        if action_mask_1d[torch.argmax(action_probs)] == 0:
-            edge_penalty = 1
-
         action_probs = torch.squeeze(action_probs) * action_mask_1d
-
-        # if torch.sum(action_probs) >= 0.00001:
-        #     action_probs = action_probs / action_probs.sum()
-
-        action_index_chosen = self.do_eps_exploration(num_episode, action_probs, action_mask_1d, mode, eps)
+        action_index_chosen = self.do_eps_exploration(
+            num_episode, action_probs, action_mask_1d, mode, eps
+        )
 
         return action_probs, action_index_chosen, action_mask_1d, eps
 
     def forward(self, input_state, eps):
-        # print(f"input state size: {input_state.size()}")
-        # input_state[:, :, :, 6] = 0
-
         if input_state.dim() == 3:
             input_state = torch.permute(input_state, (2, 0, 1))
-            # input_state = torch.unsqueeze(input_state, 1)
         elif input_state.dim() == 4:
             input_state = torch.permute(input_state, (0, 3, 1, 2))
-
 
         output = self.activation(self.conv1(input_state))
         output = self.activation(self.conv2(output))
@@ -96,65 +81,15 @@ class ActorNetwork(nn.Module):
         output = self.activation(self.fc1(h))
         # output = self.activation(self.fc2(output))
         output = self.fc3(output)
-        # log_probs = self.log_softmax(output)
         probs = self.softmax(output)
-
-        ### PLOT HISTOGRAM
 
         final = (1 - eps) * probs
         final = final + eps / self.n_actions
         return final, h
 
     def do_eps_exploration(self, num_episode, action_probs, action_mask, mode, eps):
-        # if num_episode > self.eps_anneal_phase:
-        #     eps = self.eps_min
-        # else:
-        #     eps = self.eps_max - num_episode / self.eps_anneal_phase * (
-        #         self.eps_max - self.eps_min
-        #     )
-        # index_found = False
-        # if np.random.random_sample() < eps:
-        #     index = None
-        #     while not index_found:
-        #         index = np.random.randint(self.n_actions)
-        #         if action_mask[index] == 1:
-        #             index_found = True
-        #     action_index_chosen = torch.tensor([index]).to(self.device)
-        # #     else:
-        # #         logger.info("NO VALID PROBABILITY DISTRIBUTION!")
-        #
-        # else:
-        #     if torch.sum(action_probs) < 0.00001:
-        #         index = None
-        #         while not index_found:
-        #             index = np.random.randint(self.n_actions)
-        #             if action_mask[index] == 1:
-        #                 index_found = True
-        #         action_index_chosen = torch.tensor([index]).to(self.device)
-        #         # logger.info(f"action mask: {action_mask}")
-        #         # logger.info(f"action_index_chosen: {action_index_chosen}")
-        #     else:
-        #         action_index_chosen = torch.multinomial(action_probs, 1, replacement=True)
-
-        # if num_episode > self.eps_anneal_phase:
-        #     eps = self.eps_min
-        # else:
-        #     eps = self.eps_max - num_episode / self.eps_anneal_phase * (
-        #         self.eps_max - self.eps_min
-        #     )
-
-
-        # action_probs = (1 - eps) * action_probs + eps
-
-        # print(f"train: action_probs {action_probs}")
-        # action_probs = action_probs * action_mask
-        # print(f"train: action_probs masked {action_probs}")
         if mode == "eval":
-            # if torch.sum(action_probs) >= 0.00001:
             action_index_chosen = torch.argmax(action_probs)
-            # else:
-            # index = np.randint(-1, 1)
-            # action_index_chosen = torch.tensor([(action_mask == 1).nonzero(as_tuple=True)[0][index]]).to(self.device)
         else:
             action_index_chosen = torch.multinomial(action_probs, 1, replacement=True)
 

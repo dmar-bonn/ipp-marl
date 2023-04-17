@@ -3,17 +3,13 @@ import logging
 from typing import Dict
 
 import numpy as np
-import numpy.random
 import torch
-from matplotlib import pyplot as plt
 
 import matplotlib
 
 matplotlib.use("Agg")
 
 from sklearn.metrics import explained_variance_score
-from torch import optim
-
 from utils.optimization_helpers import polyak_averaging
 from utils.utils import clip_gradients
 
@@ -29,7 +25,7 @@ class CriticLearner:
         self.n_agents = self.params["experiment"]["missions"]["n_agents"]
         self.target_critic = copy.deepcopy(critic)
         self.writer = writer
-        self.device = self.device = torch.device("cpu") # torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.target_critic.to(self.device)
         self.target_critic.load_state_dict(self.critic.state_dict())
         self.target_critic.eval()
@@ -49,7 +45,7 @@ class CriticLearner:
         self.lr = params["networks"]["critic"]["learning_rate"]
         self.momentum = params["networks"]["critic"]["momentum"]
         self.gradient_norm = params["networks"]["critic"]["gradient_norm"]
-        self.optimizer = torch.optim.Adam(self.critic.parameters(), lr=self.lr)  # optim.RMSprop(self.critic.parameters(), self.lr, self.momentum)
+        self.optimizer = torch.optim.Adam(self.critic.parameters(), lr=self.lr)
         self.mse_loss = torch.nn.MSELoss()
         self.huber_loss = torch.nn.HuberLoss(reduction="none", delta=0.1)
         self.smooth_l1loss = torch.nn.SmoothL1Loss(reduction="none")
@@ -182,7 +178,14 @@ class CriticLearner:
                 .detach()
                 .numpy(),
                 torch.mean(torch.stack(critic_log_prob_chosen)).cpu(),
-                [conv1_grad_norm/conv1_count, conv2_grad_norm/conv2_count, conv3_grad_norm/conv3_count, fc1_grad_norm/fc1_count, 0, fc3_grad_norm/fc3_count]
+                [
+                    conv1_grad_norm / conv1_count,
+                    conv2_grad_norm / conv2_count,
+                    conv3_grad_norm / conv3_count,
+                    fc1_grad_norm / fc1_count,
+                    0,
+                    fc3_grad_norm / fc3_count,
+                ],
             ],
         )
 

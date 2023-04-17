@@ -54,14 +54,12 @@ def get_wrmse(map_state, map_simulation):
     weightings[np.round(weightings, 2) == 0.5] = 0.5
 
     # rmse = np.sqrt((map_state-map_simulation)**2)
-    rmse_map = (map_state-map_simulation)**2
+    rmse_map = (map_state - map_simulation) ** 2
     map_unique, map_counts = np.unique(map_simulation, return_counts=True)
     target_counts = map_counts[-1]
     rmse_masked = rmse_map.copy()
     rmse_masked[map_simulation == 0] = 0
     wrmse = np.sqrt(np.sum(rmse_masked) / target_counts)
-
-
 
     rounded_map_state = map_state.copy()
     rounded_map_state[rounded_map_state > 0.5] = 1
@@ -75,7 +73,7 @@ def get_wrmse(map_state, map_simulation):
 
     w_f1 = f1[1]
 
-    return w_f1 # wrmse
+    return w_f1  # wrmse
 
 
 def get_fixed_footprint_coordinates(footprint, footprint_clipped):
@@ -85,17 +83,16 @@ def get_fixed_footprint_coordinates(footprint, footprint_clipped):
     xr = footprint[3] - footprint[2]
 
     if footprint_clipped[0] > footprint[0]:
-        yu = (footprint[1] - footprint[0]) - (footprint_clipped[1] - footprint_clipped[0])
+        yu = (footprint[1] - footprint[0]) - (
+            footprint_clipped[1] - footprint_clipped[0]
+        )
     if footprint_clipped[1] < footprint[1]:
         yd = footprint_clipped[1] - footprint_clipped[0]
     if footprint_clipped[3] < footprint[3]:
         xr = footprint_clipped[3] - footprint_clipped[2]
     if footprint_clipped[2] > footprint[2]:
-        xl = (footprint[3] - footprint[2]) - (footprint_clipped[3] - footprint_clipped[2])
+        xl = (footprint[3] - footprint[2]) - (
+            footprint_clipped[3] - footprint_clipped[2]
+        )
 
     return int(yu), int(yd), int(xl), int(xr)
-
-
-
-
-

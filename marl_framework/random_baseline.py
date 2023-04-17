@@ -59,11 +59,16 @@ class RandomBaseline:
             init_maps.append(agents[agent_id].local_map)
         fused_init_map = init_maps[0]
 
-        # entropy = np.mean(
-        #     get_w_entropy_map(None, fused_init_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0])
-
-        entropy_map = get_w_entropy_map(None, fused_init_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-        map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+        entropy_map = get_w_entropy_map(
+            None,
+            fused_init_map,
+            self.mapping.simulated_map,
+            "eval",
+            self.agent_state_space,
+        )[0]
+        map_unique, map_counts = np.unique(
+            self.mapping.simulated_map, return_counts=True
+        )
         target_counts = map_counts[-1]
         entropy_masked = entropy_map.copy()
         entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -77,21 +82,38 @@ class RandomBaseline:
             next_positions = []
             for agent in range(self.n_agents):
                 if t == 0:
-                    agents[agent].position = self.agent_state_space.get_random_agent_state(agent, self.num_episode)
+                    agents[
+                        agent
+                    ].position = self.agent_state_space.get_random_agent_state(
+                        agent, self.num_episode
+                    )
                 else:
-                    action_mask, _ = agents[agent].action_space.get_action_mask(agents[agent].position)
-                    action = torch.multinomial(torch.tensor(action_mask).float(), 1, replacement=True)
-                    agents[agent].position = agents[agent].action_space.action_to_position(agents[agent].position, action.item())
+                    action_mask, _ = agents[agent].action_space.get_action_mask(
+                        agents[agent].position
+                    )
+                    action = torch.multinomial(
+                        torch.tensor(action_mask).float(), 1, replacement=True
+                    )
+                    agents[agent].position = agents[
+                        agent
+                    ].action_space.action_to_position(
+                        agents[agent].position, action.item()
+                    )
                     next_positions.append(agents[agent].position)
-                updated_map, _, _, _, _ = self.mapping.update_grid_map(agents[agent].position, updated_map.copy(), t, None)
-            # done, reward, _ = get_global_reward(self.map, updated_map, None, None, self.mapping.simulated_map,
-            #                               self.agent_state_space, None, None)
+                updated_map, _, _, _, _ = self.mapping.update_grid_map(
+                    agents[agent].position, updated_map.copy(), t, None
+                )
 
-            # entropy = np.mean(
-            #     get_w_entropy_map(_, updated_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0])
-
-            entropy_map = get_w_entropy_map(None, updated_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-            map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+            entropy_map = get_w_entropy_map(
+                None,
+                updated_map,
+                self.mapping.simulated_map,
+                "eval",
+                self.agent_state_space,
+            )[0]
+            map_unique, map_counts = np.unique(
+                self.mapping.simulated_map, return_counts=True
+            )
             target_counts = map_counts[-1]
             entropy_masked = entropy_map.copy()
             entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -101,10 +123,9 @@ class RandomBaseline:
             rmse = get_wrmse(updated_map, self.mapping.simulated_map)
             rmses.append(rmse)
 
-            rewards.append(0) # reward)
+            rewards.append(0)
             self.map = updated_map.copy()
-            # if done:
-            #     break
+
 
         return sum(rewards), entropies, rmses
 
@@ -122,9 +143,8 @@ def save_mission_numbers(entropy_list, rmse_list, trials, budget):
     print(f"entropy_metrics: {entropy_metrics}")
     print(f"rmse_metrics: {rmse_metrics}")
 
-    with open('/home/penguin2/Documents/PAPER_PLOTS/random_f1.json', 'w') as fp:
+    with open("/home/penguin2/Documents/PAPER_PLOTS/random_f1.json", "w") as fp:
         json.dump([entropy_metrics, rmse_metrics], fp)
-        # json.dump(entropy_metrics, fp)
 
 
 def main():
@@ -143,16 +163,6 @@ def main():
         returns.append(global_return)
         entropies_list.append(entropies)
         rmse_list.append(rmses)
-
-        # for trial in range(10):   # 10
-        #     random_baseline = RandomBaseline(params, writer, n_episodes)
-        #     global_return, entropies = random_baseline.execute()
-        #     returns.append(global_return)
-        #     entropies_list.append(entropies)
-
-        # if episode % 10 == 0:
-        #     writer.add_scalar(f"evalReturn/Episode/mean", sum(returns) / len(returns), episode)
-        # writer.add_scalar(f"trainReturn/Episode/mean", sum(returns) / len(returns), episode)
 
     save_mission_numbers(entropies_list, rmse_list, n_episodes, budget)
 

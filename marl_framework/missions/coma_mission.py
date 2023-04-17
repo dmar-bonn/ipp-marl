@@ -1,10 +1,8 @@
 import logging
 import os
-import time
 from typing import Dict
 
 import numpy as np
-import optuna
 import seaborn as sns
 import torch
 from matplotlib import pyplot as plt
@@ -26,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 class COMAMission(Mission):
     def __init__(
-            self, params: Dict, writer: SummaryWriter, max_mean_episode_return: float
+        self, params: Dict, writer: SummaryWriter, max_mean_episode_return: float
     ):
         super().__init__(params, writer, max_mean_episode_return)
 
@@ -56,7 +54,15 @@ class COMAMission(Mission):
         chosen_actions = []
         chosen_altitudes = []
 
-        for episode_idx in range(1, int(self.num_episodes * (self.batch_size * self.batch_number) / ((self.budget + 1) * self.n_agents)) + 1):
+        for episode_idx in range(
+            1,
+            int(
+                self.num_episodes
+                * (self.batch_size * self.batch_number)
+                / ((self.budget + 1) * self.n_agents)
+            )
+            + 1,
+        ):
 
             episode = EpisodeGenerator(
                 self.params, self.writer, self.grid_map, self.sensor
@@ -84,10 +90,7 @@ class COMAMission(Mission):
                 batch_memory.build_td_targets(self.coma_wrapper.target_critic_network)
                 for data_pass in range(self.data_passes):
                     batches = batch_memory.build_batches()
-                    q_values, q_metrics = self.coma_wrapper.q_learner.learn(
-                        self.training_step_idx, batches, data_pass
-                    )
-                    v_values, v_metrics = self.coma_wrapper.v_learner.learn(
+                    q_values, critic_metrics = self.coma_wrapper.critic_learner.learn(
                         self.training_step_idx, batches, data_pass
                     )
                     actor_network, actor_metrics = self.coma_wrapper.actor_learner.learn(
@@ -99,8 +102,13 @@ class COMAMission(Mission):
                         logger.info(f"Training step: {self.training_step_idx}")
                         logger.info(f"Environment step: {self.environment_step_idx}")
                         self.add_to_tensorboard(
-                            chosen_actions, chosen_altitudes, episode_returns, absolute_returns, episode_reward_list,
-                            q_metrics, actor_metrics
+                            chosen_actions,
+                            chosen_altitudes,
+                            episode_returns,
+                            absolute_returns,
+                            episode_reward_list,
+                            critic_metrics,
+                            actor_metrics,
                         )
 
                 batch_memory.clear()
@@ -147,8 +155,13 @@ class COMAMission(Mission):
                         chosen_altitudes.append(agent_altitudes)
 
                     batch_memory.clear()
-                    self.add_to_tensorboard(chosen_actions, chosen_altitudes, episode_returns, absolute_returns,
-                                            episode_reward_list)
+                    self.add_to_tensorboard(
+                        chosen_actions,
+                        chosen_altitudes,
+                        episode_returns,
+                        absolute_returns,
+                        episode_reward_list,
+                    )
                     self.mode = "train"
                     episode_returns = []
                     episode_reward_list = []
@@ -159,9 +172,14 @@ class COMAMission(Mission):
         return self.max_mean_episode_return
 
     def add_to_tensorboard(
-            self, chosen_actions, chosen_altitudes, episode_returns, absolute_returns, episode_rewards,
-            critic_metrics=None,
-            actor_metrics=None
+        self,
+        chosen_actions,
+        chosen_altitudes,
+        episode_returns,
+        absolute_returns,
+        episode_rewards,
+        critic_metrics=None,
+        actor_metrics=None,
     ):
 
         episode_rewards = [item for sublist in episode_rewards for item in sublist]
@@ -175,20 +193,14 @@ class COMAMission(Mission):
 
         plt.figure()
         fig_ = sns.barplot(
-            x=list(range(self.n_actions)),
-            y=action_counts,
-            color="blue",
+            x=list(range(self.n_actions)), y=action_counts, color="blue"
         ).get_figure()
         self.writer.add_figure(
             f"Sampled_actions_{self.mode}", fig_, self.training_step_idx, close=True
         )
 
         plt.figure()
-        fig_ = sns.barplot(
-            x=[5, 10, 15],
-            y=altitude_counts,
-            color="blue",
-        ).get_figure()
+        fig_ = sns.barplot(x=[5, 10, 15], y=altitude_counts, color="blue").get_figure()
         self.writer.add_figure(
             f"Altitudes_{self.mode}", fig_, self.training_step_idx, close=True
         )
@@ -416,16 +428,24 @@ class COMAMission(Mission):
         best_model_file_path = os.path.join(constants.LOG_DIR, "best_model.pth")
 
         if (
-                len(self.episode_returns) >= patience
-                and running_mean_return > self.max_mean_episode_return
+            len(self.episode_returns) >= patience
+            and running_mean_return > self.max_mean_episode_return
         ):
             self.max_mean_episode_return = running_mean_return
             torch.save(actor_network, best_model_file_path)
         if self.training_step_idx == 300:
-            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_300.pth"))
+            torch.save(
+                actor_network, os.path.join(constants.LOG_DIR, "best_model_300.pth")
+            )
         if self.training_step_idx == 400:
-            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_400.pth"))
+            torch.save(
+                actor_network, os.path.join(constants.LOG_DIR, "best_model_400.pth")
+            )
         if self.training_step_idx == 500:
-            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_500.pth"))
+            torch.save(
+                actor_network, os.path.join(constants.LOG_DIR, "best_model_500.pth")
+            )
         if self.training_step_idx == 600:
-            torch.save(actor_network, os.path.join(constants.LOG_DIR, "best_model_600.pth"))
+            torch.save(
+                actor_network, os.path.join(constants.LOG_DIR, "best_model_600.pth")
+            )

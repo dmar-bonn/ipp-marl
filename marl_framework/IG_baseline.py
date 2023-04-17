@@ -36,7 +36,9 @@ class IG_baseline:
         self.budget = params["experiment"]["constraints"]["budget"]
         self.n_agents = params["experiment"]["missions"]["n_agents"]
         self.class_weighting = params["experiment"]["missions"]["class_weighting"]
-        self.communication = params["experiment"]["baselines"]["information_gain"]["communication"]
+        self.communication = params["experiment"]["baselines"]["information_gain"][
+            "communication"
+        ]
         self.coma_wrapper = COMAWrapper(params, writer)
         self.grid_map = GridMap(params)
         self.sensor_model = AltitudeSensorModel(params)
@@ -46,7 +48,9 @@ class IG_baseline:
         self.action_space = AgentActionSpace(params)
         self.batch_memory = BatchMemory(params, self.coma_wrapper)
         self.camera = Camera(params, self.sensor_model, self.grid_map)
-        self.simulation = Simulation(params, self.sensor, num_episode, self.sensor_model)
+        self.simulation = Simulation(
+            params, self.sensor, num_episode, self.sensor_model
+        )
         self.writer = writer
 
     def execute(self):
@@ -74,9 +78,16 @@ class IG_baseline:
             init_maps.append(agents[agent_id].local_map)
         current_global_map = init_maps[0].copy()
 
-        entropy_map = \
-        get_w_entropy_map(None, current_global_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-        map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+        entropy_map = get_w_entropy_map(
+            None,
+            current_global_map,
+            self.mapping.simulated_map,
+            "eval",
+            self.agent_state_space,
+        )[0]
+        map_unique, map_counts = np.unique(
+            self.mapping.simulated_map, return_counts=True
+        )
         target_counts = map_counts[-1]
         entropy_masked = entropy_map.copy()
         entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -97,35 +108,58 @@ class IG_baseline:
             altitudes = []
 
             global_information, positions, observations = self.coma_wrapper.build_observations(
-                self.mapping, agents, self.num_episode, t, self.params, self.batch_memory, None
+                self.mapping,
+                agents,
+                self.num_episode,
+                t,
+                self.params,
+                self.batch_memory,
+                None,
             )
 
             if t == 0:
                 agent_positions.append(positions)
-                current_global_map = self.mapping.fuse_map(current_global_map, global_information, None, "global")
+                current_global_map = self.mapping.fuse_map(
+                    current_global_map, global_information, None, "global"
+                )
 
             for agent_id in range(self.n_agents):
-                action_mask = self.action_space.get_action_mask(agents[agent_id].position)[0]
-                action_mask = self.action_space.apply_collision_mask(agents[agent_id].position, action_mask,
-                                                                     next_positions, self.agent_state_space)
-                action_positions, information_gains = self.get_individual_ig(agents[agent_id].position, action_mask,
-                                                                             agents[agent_id].local_map)
+                action_mask = self.action_space.get_action_mask(
+                    agents[agent_id].position
+                )[0]
+                action_mask = self.action_space.apply_collision_mask(
+                    agents[agent_id].position,
+                    action_mask,
+                    next_positions,
+                    self.agent_state_space,
+                )
+                action_positions, information_gains = self.get_individual_ig(
+                    agents[agent_id].position, action_mask, agents[agent_id].local_map
+                )
                 action_position_list.append(action_positions)
                 information_gain_list.append(information_gains)
                 next_positions.append(agents[agent_id].position)
 
             relative_information_gains = self.get_relative_ig(information_gain_list)
             if self.communication:
-                cell_utilities = self.get_cell_utilities(action_position_list, relative_information_gains)
+                cell_utilities = self.get_cell_utilities(
+                    action_position_list, relative_information_gains
+                )
             else:
                 cell_utilities = relative_information_gains
 
             for agent_id in range(self.n_agents):
                 action = self.select_action(cell_utilities[agent_id])
-                agents[agent_id].position = self.action_space.action_to_position(agents[agent_id].position, action)
-                agents[agent_id].local_map, agents[agent_id].map_footprint, _, agents[agent_id].map2communicate, agents[
-                    agent_id].footprint_img = self.mapping.update_grid_map(agents[agent_id].position,
-                                                                                   agents[agent_id].local_map, t, None)
+                agents[agent_id].position = self.action_space.action_to_position(
+                    agents[agent_id].position, action
+                )
+                agents[agent_id].local_map, agents[agent_id].map_footprint, _, agents[
+                    agent_id
+                ].map2communicate, agents[
+                    agent_id
+                ].footprint_img = self.mapping.update_grid_map(
+                    agents[agent_id].position, agents[agent_id].local_map, t, None
+                )
                 next_maps.append(agents[agent_id].local_map)
                 maps2communicate_list.append(agents[agent_id].map2communicate)
                 next_positions.append(agents[agent_id].position)
@@ -134,17 +168,36 @@ class IG_baseline:
             agent_positions.append(next_positions)
             agent_altitudes.append(altitudes)
 
-            next_global_map = self.mapping.fuse_map(current_global_map, maps2communicate_list, None, "global")
+            next_global_map = self.mapping.fuse_map(
+                current_global_map, maps2communicate_list, None, "global"
+            )
             current_global_map = next_global_map.copy()
-            done, relative_reward, absolute_reward = get_global_reward(current_global_map, next_global_map, None, None,
-                                                                       self.mapping.simulated_map,
-                                                                       self.agent_state_space, None, None, t, self.budget)
+            done, relative_reward, absolute_reward = get_global_reward(
+                current_global_map,
+                next_global_map,
+                None,
+                None,
+                self.mapping.simulated_map,
+                self.agent_state_space,
+                None,
+                None,
+                t,
+                self.budget,
+            )
 
             relative_rewards.append(relative_reward)
             absolute_rewards.append(absolute_reward)
 
-            entropy_map = get_w_entropy_map(None, next_global_map, self.mapping.simulated_map, "eval", self.agent_state_space)[0]
-            map_unique, map_counts = np.unique(self.mapping.simulated_map, return_counts=True)
+            entropy_map = get_w_entropy_map(
+                None,
+                next_global_map,
+                self.mapping.simulated_map,
+                "eval",
+                self.agent_state_space,
+            )[0]
+            map_unique, map_counts = np.unique(
+                self.mapping.simulated_map, return_counts=True
+            )
             target_counts = map_counts[-1]
             entropy_masked = entropy_map.copy()
             entropy_masked[self.mapping.simulated_map == 0] = 0
@@ -158,7 +211,13 @@ class IG_baseline:
 
         # plot_trajectories(agent_positions, self.n_agents, self.writer, self.num_episode, None, None, self.mapping.simulated_map)
 
-        return sum(relative_rewards), sum(absolute_rewards), agent_altitudes, entropies, rmses
+        return (
+            sum(relative_rewards),
+            sum(absolute_rewards),
+            agent_altitudes,
+            entropies,
+            rmses,
+        )
 
     def get_individual_ig(self, position, action_mask, map_state):
         action_positions = []
@@ -170,13 +229,20 @@ class IG_baseline:
                 information_gains.append(0)
             else:
                 new_position = self.action_space.action_to_position(position, action)
-                footprint = self.camera.project_field_of_view(new_position, self.grid_map.resolution_x,
-                                                              self.grid_map.resolution_y)[1]
-                map_section = map_state[footprint[2]: footprint[3], footprint[0]: footprint[1]].copy()
+                footprint = self.camera.project_field_of_view(
+                    new_position, self.grid_map.resolution_x, self.grid_map.resolution_y
+                )[1]
+                map_section = map_state[
+                    footprint[2] : footprint[3], footprint[0] : footprint[1]
+                ].copy()
 
                 noise_level = self.sensor_model.get_noise_variance(new_position[2])
-                class_weightings_1 = self.mapping.update_cells(map_section.copy(), 1 - noise_level, None)
-                class_weightings_2 = self.mapping.update_cells(map_section.copy(), noise_level, None)
+                class_weightings_1 = self.mapping.update_cells(
+                    map_section.copy(), 1 - noise_level, None
+                )
+                class_weightings_2 = self.mapping.update_cells(
+                    map_section.copy(), noise_level, None
+                )
                 class_weightings_1[class_weightings_1 > 0.501] = 1
                 # class_weightings_1[class_weightings_1 < 0.501] = 0.5
                 class_weightings_1[class_weightings_1 < 0.499] = 0
@@ -184,10 +250,26 @@ class IG_baseline:
                 # class_weightings_2[class_weightings_2 < 0.501] = 0.5
                 class_weightings_2[class_weightings_2 < 0.499] = 0
 
-                ig = map_section * (get_shannon_entropy(map_section) - get_shannon_entropy(
-                    self.mapping.update_cells(map_section, 1 - noise_level, None))) * class_weightings_1 + (
-                             1 - map_section) * (get_shannon_entropy(map_section) - get_shannon_entropy(
-                    self.mapping.update_cells(map_section, noise_level, None))) * class_weightings_2
+                ig = (
+                    map_section
+                    * (
+                        get_shannon_entropy(map_section)
+                        - get_shannon_entropy(
+                            self.mapping.update_cells(
+                                map_section, 1 - noise_level, None
+                            )
+                        )
+                    )
+                    * class_weightings_1
+                    + (1 - map_section)
+                    * (
+                        get_shannon_entropy(map_section)
+                        - get_shannon_entropy(
+                            self.mapping.update_cells(map_section, noise_level, None)
+                        )
+                    )
+                    * class_weightings_2
+                )
 
                 # measurement = map_section * (1 - noise_level) + (1 - map_section) * noise_level
                 # cell_update = self.mapping.update_cells(map_section, measurement, None)
@@ -210,7 +292,9 @@ class IG_baseline:
         for agent_id in range(len(information_gain_list)):
             total_ig = sum(information_gain_list[agent_id])
             for pos in range(len(information_gain_list[agent_id])):
-                information_gain_list[agent_id][pos] = information_gain_list[agent_id][pos] / total_ig
+                information_gain_list[agent_id][pos] = (
+                    information_gain_list[agent_id][pos] / total_ig
+                )
         return information_gain_list
 
     def get_cell_utilities(self, action_position_list, relative_information_gains):
@@ -224,13 +308,17 @@ class IG_baseline:
                     else:
                         for pos2 in range(len(action_position_list[id2])):
                             position2 = action_position_list[id2][pos2]
-                            relative_information_gain2 = relative_information_gains[id2][pos2]
+                            relative_information_gain2 = relative_information_gains[
+                                id2
+                            ][pos2]
                             if np.array_equal(position1, position2):
                                 if not type(position1) is np.ndarray:
                                     pass
                                 else:
-                                    relative_information_gains[agent_id][pos1] = relative_information_gain1 * (
-                                                1 - relative_information_gain2)
+                                    relative_information_gains[agent_id][pos1] = (
+                                        relative_information_gain1
+                                        * (1 - relative_information_gain2)
+                                    )
         return relative_information_gains
 
     def select_action(self, cell_utilities):
@@ -250,7 +338,7 @@ def save_mission_numbers(entropy_list, rmse_list, trials, budget):
     print(f"entropy_metrics: {entropy_metrics}")
     print(f"rmse_metrics: {rmse_metrics}")
 
-    with open('/home/penguin2/Documents/PAPER_PLOTS/ig_zero_f1.json', 'w') as fp:
+    with open("/home/penguin2/Documents/PAPER_PLOTS/ig_zero_f1.json", "w") as fp:
         json.dump([entropy_metrics, rmse_metrics], fp)
         # json.dump(entropy_metrics, fp)
 

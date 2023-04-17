@@ -12,11 +12,11 @@ from matplotlib import pyplot as plt
 
 
 def get_w_entropy_map(
-        map_footprint: np.array,
-        local_map: np.array,
-        simulated_map: np.array,
-        observability: str,
-        agent_state_space: AgentStateSpace,
+    map_footprint: np.array,
+    local_map: np.array,
+    simulated_map: np.array,
+    observability: str,
+    agent_state_space: AgentStateSpace,
 ):
     if observability != "reward" and observability != "eval":
         grid_map = cv2.resize(
@@ -51,20 +51,20 @@ def get_w_entropy_map(
 
 
 def calculate_w_entropy(
-        grid_map: np.array,
-        map_footprint: np.array,
-        simulated_map: np.array,
-        observability: str,
-        agent_state_space: AgentStateSpace,
+    grid_map: np.array,
+    map_footprint: np.array,
+    simulated_map: np.array,
+    observability: str,
+    agent_state_space: AgentStateSpace,
 ):
     class_weighting = [0, 1]
 
-    if observability == "eval":      # use ground truth for evaluation
+    if observability == "eval":  # use ground truth for evaluation
         target = copy.deepcopy(simulated_map)
     else:
         target = copy.deepcopy(grid_map)
 
-    target[target > 0.501] = 1        # map is binary
+    target[target > 0.501] = 1  # map is binary
     target[target < 0.499] = 0
 
     weightings = target.copy()
@@ -99,8 +99,12 @@ def calculate_w_entropy(
         target_footprint[target_footprint < 0.499] = 0
 
         weightings_footprint = target_footprint.copy()
-        weightings_footprint[np.round(weightings_footprint, 2) == 0] = class_weighting[0]
-        weightings_footprint[np.round(weightings_footprint, 2) == 1] = class_weighting[1]
+        weightings_footprint[np.round(weightings_footprint, 2) == 0] = class_weighting[
+            0
+        ]
+        weightings_footprint[np.round(weightings_footprint, 2) == 1] = class_weighting[
+            1
+        ]
         weightings_footprint[np.round(weightings_footprint, 2) == 0.5] = 0.5
 
         se_footprint = get_shannon_entropy(map_footprint)
@@ -118,7 +122,7 @@ def get_shannon_entropy(p):
 
 
 def append_global_information_to_timestep(
-        data_timestep, mapping, communication_log: CommunicationLog
+    data_timestep, mapping, communication_log: CommunicationLog
 ) -> List:
     data_timestep[0]["global_positions"] = communication_log.get_global_positions()
     other_agents_maps = {

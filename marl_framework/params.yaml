@@ -77,14 +77,14 @@ evaluation:
 networks:
   type: "CNN"
   data_passes: 5
-  batch_size: 600
+  batch_size: 60
   batch_number: 5
   copy_rate: 10     # full episodes
   gamma: 0.99
   lambda: 0.8
   actor:
     hidden_dim: 128
-    learning_rate: 0.00001 # 0.000005
+    learning_rate: 0.00001
     momentum: 0.9
     gradient_norm: 10
   critic:
@@ -93,7 +93,7 @@ networks:
     update_mode: "random_batches"
     synchronization: "no"
     fc1_dim: 64
-    learning_rate: 0.0001 # 0.00003
+    learning_rate: 0.0001
     momentum: 0.9
     gradient_norm: 10
 

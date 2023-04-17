@@ -39,7 +39,14 @@ class BatchMemory:
     ):
         self.transitions[agent_id].append(
             TransitionCOMA(
-                state, observation, action, mask, reward, done, td_target, discounted_return
+                state,
+                observation,
+                action,
+                mask,
+                reward,
+                done,
+                td_target,
+                discounted_return,
             )
         )
 
