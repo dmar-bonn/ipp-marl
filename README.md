@@ -28,6 +28,15 @@ At each time step during a mission, each UAV takes a measurement and updates its
 Jonas Westheider, jwestheider@uni-bonn.de, Ph.D. student at PhenoRob - University of Bonn.
 
 
+## Requirements
+
+matplotlib=3.5.1
+numpy=1.22.2
+opencv-python=4.5.5.62
+scipy=1.8.1
+torch=1.13.0+cu117
+
+
 ## Funding
 
 This work was funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy - EXC 2070 – 390732324. Authors are with the Cluster of Excellence PhenoRob, Institute of Geodesy and Geoinformation, University of Bonn.
